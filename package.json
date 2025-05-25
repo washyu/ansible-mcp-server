@@ -23,7 +23,8 @@
     "test:verbose": "NODE_OPTIONS='--experimental-vm-modules' jest --verbose",
     "test:ci": "NODE_OPTIONS='--experimental-vm-modules' jest --ci --coverage --maxWorkers=2",
     "test:old": "node --test tests/",
-    "test:sse": "node test-sse-server.js"
+    "test:sse": "NODE_OPTIONS='--experimental-vm-modules' jest tests/integration/sse-mcp-integration.test.js",
+    "test:sse:old": "node test-sse-server.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
