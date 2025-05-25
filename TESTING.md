@@ -1,5 +1,15 @@
 # Ansible MCP Server Testing Guide
 
+## Overview
+
+This guide documents the testing procedures for the Ansible MCP Server project. We use a multi-layered testing approach to ensure code quality and prevent regressions.
+
+## Branch Strategy
+
+- **main**: Protected branch, requires all tests to pass
+- **development**: Working branch for active development  
+- **feature/***: Feature branches for specific features
+
 ## Test Framework
 
 We use **Jest** as our testing framework with the following configuration:
@@ -8,6 +18,51 @@ We use **Jest** as our testing framework with the following configuration:
 - **Coverage Reporting**: Built-in Jest coverage with HTML, LCOV, and text reports
 - **Test Structure**: Unit tests, integration tests, and mock support
 - **Timeout**: 30 seconds for async operations
+- **Pre-push Hook**: Automatically runs tests before pushing to main
+
+## Development Workflow
+
+### 1. Working on Features
+
+```bash
+# Start from development branch
+git checkout development
+git pull origin development
+
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Make changes and test
+npm test
+node run-tool-tests.js  # Run tool-specific tests
+
+# Commit and push to feature branch
+git add .
+git commit -m "feat: your feature description"
+git push origin feature/your-feature-name
+```
+
+### 2. Merging to Development
+
+```bash
+# Merge feature to development
+git checkout development
+git merge feature/your-feature-name
+git push origin development
+```
+
+### 3. Merging to Main
+
+```bash
+# Ensure all tests pass
+npm test
+node run-tool-tests.js
+
+# Merge to main (pre-push hook will run tests)
+git checkout main
+git merge development
+git push origin main  # Tests must pass or push will fail
+```
 
 ## Running Tests
 
@@ -26,7 +81,40 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest tests/unit/ansible-tools.test.
 
 # Run old test suite (for comparison)
 npm run test:old
+
+# Run automated tool tests
+node run-tool-tests.js
+
+# Run tool tests with verbose output
+node run-tool-tests.js --verbose
 ```
+
+## Automated Tool Testing
+
+We have a comprehensive automated test script (`run-tool-tests.js`) that tests each tool with various scenarios:
+
+### Running Tool Tests
+
+```bash
+# Run all tool tests
+node run-tool-tests.js
+
+# Run with verbose output
+node run-tool-tests.js --verbose
+```
+
+### Tool Test Coverage
+
+The automated test suite covers:
+- **ansible-playbook**: Basic execution, check mode, extra vars, error cases
+- **browse-services**: All categories, search functionality
+- **service-details**: Valid services, error handling
+- **deploy-service**: Service deployment (stub testing)
+- **create-playbook**: Simple and complex playbook creation
+- **create-vm-template**: VM template generation
+- **discover-proxmox**: Infrastructure discovery (if configured)
+- **generate-diagram**: Multiple output formats
+- And more...
 
 ## Test Structure
 

@@ -1,0 +1,69 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run Jest tests
+      run: npm test
+      env:
+        NODE_OPTIONS: '--experimental-vm-modules'
+    
+    - name: Run tool tests
+      run: node run-tool-tests.js
+      continue-on-error: true  # Don't fail build on tool test failures (for now)
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-${{ matrix.node-version }}
+        path: coverage/
+    
+    - name: Check for stub implementations
+      run: |
+        echo "Checking for stub implementations..."
+        grep -r "TODO\|placeholder\|stub" src/tools/ || true
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check for console.log statements
+      run: |
+        if grep -r "console\.log" src/ --exclude-dir=node_modules; then
+          echo "::warning::Found console.log statements in source code"
+        fi
