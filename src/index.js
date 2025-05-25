@@ -37,8 +37,11 @@ async function initializeTools() {
     await loadServiceTools(service);
   }
   
-  console.error(`Initialized with ${toolRegistry.getAllDefinitions().length} tools`);
-  console.error(`Loaded service modules: ${loadedServices.join(', ') || 'none'}`);
+  // Log to stderr only in development mode
+  if (process.env.NODE_ENV === 'development') {
+    console.error(`Initialized with ${toolRegistry.getAllDefinitions().length} tools`);
+    console.error(`Loaded service modules: ${loadedServices.join(', ') || 'none'}`);
+  }
 }
 
 // List available tools
@@ -106,8 +109,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   
-  console.error('Ansible MCP server running on stdio');
-  console.error(`Loaded ${toolRegistry.getAllDefinitions().length} tools`);
+  // Server is ready - no console output in production to avoid stdio interference
   
   // Save current infrastructure context
   const infrastructureContext = toolRegistry.getContext('infrastructure') || {};
@@ -117,6 +119,9 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error('Server error:', error);
+  // In production, errors should be sent through the MCP protocol, not stderr
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Server error:', error);
+  }
   process.exit(1);
 });
