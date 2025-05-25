@@ -7,9 +7,9 @@ This guide helps you migrate from an existing Ansible controller to the MCP serv
 
 ### Typical Infrastructure Discovery
 Replace these examples with your actual values:
-- **Proxmox Host**: `192.168.1.100` (your hypervisor)
-- **Existing Controller**: `192.168.1.50` (current Ansible server)
-- **Network Range**: `192.168.1.0/24` (your subnet)
+- **Proxmox Host**: `YOUR_PROXMOX_HOST` (your hypervisor)
+- **Existing Controller**: `YOUR_ANSIBLE_CONTROLLER` (current Ansible server)
+- **Network Range**: `YOUR_NETWORK_SUBNET` (your subnet)
 - **Controller User**: `ansible` or `admin` (your username)
 
 ## Migration Steps
@@ -65,15 +65,15 @@ add-external-server \
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   MCP Server    │    │ Existing Ansible│    │  Proxmox Host   │
-│  192.168.1.10   │───►│   Controller    │───►│  192.168.1.100  │
-│                 │    │  192.168.1.50   │    │                 │
+│  YOUR_GATEWAY_IP0   │───►│   Controller    │───►│  YOUR_PROXMOX_HOST  │
+│                 │    │  YOUR_ANSIBLE_CONTROLLER   │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
                                  ▼
                     ┌─────────────────────────┐
                     │     Managed VMs         │
-                    │  192.168.1.101-199      │
+                    │  YOUR_GATEWAY_IP01-199      │
                     └─────────────────────────┘
 ```
 
@@ -101,7 +101,7 @@ add-external-server \
 {
   "controllers": [
     {
-      "host": "192.168.1.50",
+      "host": "YOUR_ANSIBLE_CONTROLLER",
       "hostname": "ansible-controller",
       "username": "ansible",
       "ansibleVersion": "2.14.0",
@@ -123,7 +123,7 @@ add-external-server --hostname="nas-server.local" --type="nas"
 add-external-server --hostname="dns-server.local" --type="pihole"
 
 # Gateway/Router
-add-external-server --hostname="192.168.1.1" --type="gateway"
+add-external-server --hostname="YOUR_GATEWAY_IP" --type="gateway"
 ```
 
 ## Best Practices
@@ -169,9 +169,9 @@ After successful migration:
 
 Set these for your specific environment:
 ```bash
-export PROXMOX_HOST="192.168.1.100"
+export PROXMOX_HOST="YOUR_PROXMOX_HOST"
 export PROXMOX_USER="root@pam"
-export DEFAULT_GATEWAY="192.168.1.1"
+export DEFAULT_GATEWAY="YOUR_GATEWAY_IP"
 export DEFAULT_NETWORK_CIDR="24"
 ```
 

@@ -24,7 +24,7 @@ const AddExternalServerSchema = z.object({
 });
 
 const NetworkDiscoverySchema = z.object({
-  subnet: z.string().default('192.168.1.0/24').describe('Network subnet to scan'),
+  subnet: z.string().default('YOUR_NETWORK_SUBNET').describe('Network subnet to scan'),
   knownDevices: z.array(z.object({
     ip: z.string(),
     name: z.string(),

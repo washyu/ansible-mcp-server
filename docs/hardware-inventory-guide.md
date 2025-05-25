@@ -12,10 +12,10 @@ Comprehensive scan of system hardware:
 claude "Run hardware scan"
 
 # Scan remote system
-claude "Scan hardware on homelab2"
+claude "Scan hardware on test-server"
 
 # Scan specific categories
-claude "Scan CPU and memory on 192.168.10.20"
+claude "Scan CPU and memory on YOUR_TEST_SERVER_IP"
 
 # Save to inventory
 claude "Scan hardware on all servers and save to inventory"
@@ -26,7 +26,7 @@ Detailed storage information including SMART health:
 
 ```bash
 # Basic storage info
-claude "Analyze storage on homelab2"
+claude "Analyze storage on test-server"
 
 # Include SMART data
 claude "Check disk health with SMART data on server1"
@@ -37,7 +37,7 @@ Network adapter information:
 
 ```bash
 # Physical interfaces only
-claude "Show network interfaces on homelab2"
+claude "Show network interfaces on test-server"
 
 # Include virtual interfaces
 claude "Show all network interfaces including virtual"
@@ -84,7 +84,7 @@ claude "Run CPU, memory and disk benchmarks"
 ```json
 {
   "system": {
-    "hostname": "homelab2",
+    "hostname": "test-server",
     "os": "Ubuntu 22.04.3 LTS",
     "kernel": "5.15.0-89-generic",
     "manufacturer": "Dell Inc.",
@@ -142,8 +142,8 @@ The hardware inventory can be used to:
 
 1. **Generate Ansible host variables**:
    ```yaml
-   homelab2:
-     ansible_host: 192.168.10.20
+   test-server:
+     ansible_host: YOUR_TEST_SERVER_IP
      hardware_cpu_cores: 32
      hardware_memory_gb: 128
      hardware_gpu_present: true
@@ -153,12 +153,12 @@ The hardware inventory can be used to:
    ```yaml
    gpu_servers:
      hosts:
-       homelab2:
+       test-server:
        workstation1:
    
    high_memory_servers:
      hosts:
-       homelab2:
+       test-server:
        database1:
    ```
 
@@ -181,7 +181,7 @@ claude "Find all servers with at least 16GB RAM and 100GB free disk space"
 
 ### Monitor hardware changes
 ```bash
-claude "Compare current hardware scan of homelab2 with the inventory and report any changes"
+claude "Compare current hardware scan of test-server with the inventory and report any changes"
 ```
 
 ## Future Enhancements

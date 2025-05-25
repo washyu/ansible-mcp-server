@@ -4,7 +4,7 @@ Generated: May 23, 2025
 ## Current Infrastructure Status
 
 ### ✅ Working Hosts
-1. **homelab2** (192.168.10.108)
+1. **test-server** (192.168.10.108)
    - OS: Ubuntu 24.04
    - Connection: Local (no SSH needed)
    - Status: Fully operational
@@ -21,7 +21,7 @@ Generated: May 23, 2025
    - OS: Debian 12.10 (per old report)
    - Issue: SSH authentication failing
    - Status: Host is reachable (ping works)
-   - Action needed: Set up SSH key authentication or create shaun user
+   - Action needed: Set up SSH key authentication or create user user
 
 2. **truenas** (192.168.10.164)
    - OS: Debian 12.9 (per old report)
@@ -55,13 +55,13 @@ Generated: May 23, 2025
 - `backup.yml` - Backup configuration
 
 ## Ansible Configuration
-- **Inventory**: `/home/shaun/ansible/inventory/hosts`
-- **Playbooks**: `/home/shaun/ansible/playbooks/`
-- **Reports**: `/home/shaun/ansible/reports/`
-- **Vault**: `/home/shaun/ansible/vault.yml` (encrypted secrets)
+- **Inventory**: `/home/user/ansible/inventory/hosts`
+- **Playbooks**: `/home/user/ansible/playbooks/`
+- **Reports**: `/home/user/ansible/reports/`
+- **Vault**: `/home/user/ansible/vault.yml` (encrypted secrets)
 
 ## MCP Server Status
-- **Location**: `/opt/ansible-mcp-server` on homelab2
+- **Location**: `/opt/ansible-mcp-server` on test-server
 - **Service**: `ansible-mcp-server.service`
 - **Status**: Installed and ready (requires client connection)
 - **Tools Available**:
@@ -72,7 +72,7 @@ Generated: May 23, 2025
 
 ## Next Steps
 1. Fix SSH access to amdaiserver:
-   - Create shaun user with sudo access
+   - Create user user with sudo access
    - Or set up SSH key for existing user
 
 2. Fix TrueNAS SSH access:

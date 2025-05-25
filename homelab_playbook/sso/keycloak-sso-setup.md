@@ -11,8 +11,8 @@
 
 ### 1.2 Create Your User Account
 1. In homelab realm → Users → Add User
-2. Username: `shaun`
-3. Email: `shaun@shaunjackson.space`
+2. Username: `user`
+3. Email: `user@userjackson.space`
 4. Email Verified: ON
 5. Save
 6. Credentials tab → Set Password
@@ -38,7 +38,7 @@
    - Client Authentication: ON
    - Authorization: OFF
    - Save
-   - Valid Redirect URIs: `https://grafana.shaunjackson.space/*`
+   - Valid Redirect URIs: `https://grafana.userjackson.space/*`
    - (For testing: also add `http://192.168.10.108:3000/*`)
    - Save
    - Credentials tab → Copy the Client Secret
@@ -66,7 +66,7 @@
 1. **In Keycloak** - Create Client:
    - Client ID: `portainer`
    - Same settings as Grafana
-   - Valid Redirect URIs: `https://portainer.shaunjackson.space/*`
+   - Valid Redirect URIs: `https://portainer.userjackson.space/*`
    - (For testing: `http://192.168.10.108:9000/*`)
 
 2. **In Portainer**:
@@ -84,7 +84,7 @@
 
 1. **In Keycloak** - Create Client:
    - Client ID: `nginx-proxy-manager`
-   - Valid Redirect URIs: `https://npm.shaunjackson.space/*`
+   - Valid Redirect URIs: `https://npm.userjackson.space/*`
 
 2. **In NPM**: Check Settings for OAuth options
 
@@ -92,7 +92,7 @@
 
 1. **In Keycloak** - Create Client:
    - Client ID: `proxmox`
-   - Valid Redirect URIs: `https://proxmox.shaunjackson.space/*`
+   - Valid Redirect URIs: `https://proxmox.userjackson.space/*`
 
 2. **In Proxmox**:
    ```bash
@@ -131,7 +131,7 @@ docker restart grafana
 ## Step 4: After DNS Propagates
 
 Update all URLs to use HTTPS:
-- Change http://192.168.10.108:8090 → https://auth.shaunjackson.space
+- Change http://192.168.10.108:8090 → https://auth.userjackson.space
 - Update all service configurations
 
 ## Benefits:

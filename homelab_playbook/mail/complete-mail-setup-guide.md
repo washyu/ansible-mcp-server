@@ -15,8 +15,8 @@ Poste.io mail server is now running on your homelab with:
 - **URL**: http://192.168.10.108:8085
 - First time setup wizard will appear
 - Configure:
-  - **Primary Domain**: shaunjackson.space
-  - **Admin Email**: admin@shaunjackson.space
+  - **Primary Domain**: userjackson.space
+  - **Admin Email**: admin@userjackson.space
   - **Admin Password**: (choose a strong one)
   - **Timezone**: America/New_York
 
@@ -27,15 +27,15 @@ Login to your DNS provider and add:
 ```
 Type    Name    Value                           Priority
 A       mail    68.111.95.149                   -
-MX      @       mail.shaunjackson.space         10
+MX      @       mail.userjackson.space         10
 TXT     @       "v=spf1 mx a ~all"              -
 ```
 
 Optional but recommended:
 ```
-CNAME   webmail     mail.shaunjackson.space     -
-CNAME   smtp        mail.shaunjackson.space     -
-CNAME   imap        mail.shaunjackson.space     -
+CNAME   webmail     mail.userjackson.space     -
+CNAME   smtp        mail.userjackson.space     -
+CNAME   imap        mail.userjackson.space     -
 ```
 
 ### 3. Router Port Forwarding
@@ -48,14 +48,14 @@ Add these port forwards to 192.168.10.108:
 ### 4. NPM Proxy Configuration
 
 Add this proxy host in Nginx Proxy Manager:
-- **Domain**: mail.shaunjackson.space
+- **Domain**: mail.userjackson.space
 - **Scheme**: http
 - **Forward Host**: 192.168.10.108
 - **Forward Port**: 8085
 - **Enable**: SSL, Force SSL, HTTP/2, HSTS
 
 Also add (optional):
-- **Domain**: webmail.shaunjackson.space
+- **Domain**: webmail.userjackson.space
 - Same settings as above
 
 ## 📱 Email Client Configuration
@@ -63,17 +63,17 @@ Also add (optional):
 After DNS propagates (5-30 minutes):
 
 ### Incoming Mail (IMAP)
-- **Server**: mail.shaunjackson.space
+- **Server**: mail.userjackson.space
 - **Port**: 993
 - **Security**: SSL/TLS
-- **Username**: admin@shaunjackson.space
+- **Username**: admin@userjackson.space
 - **Password**: (what you set)
 
 ### Outgoing Mail (SMTP)
-- **Server**: mail.shaunjackson.space
+- **Server**: mail.userjackson.space
 - **Port**: 587
 - **Security**: STARTTLS
-- **Username**: admin@shaunjackson.space
+- **Username**: admin@userjackson.space
 - **Password**: (what you set)
 
 ## 🔧 Advanced Configuration
@@ -94,7 +94,7 @@ After DNS propagates (5-30 minutes):
 ### Add DMARC Record
 Add this TXT record for better deliverability:
 - Name: `_dmarc`
-- Value: `"v=DMARC1; p=quarantine; rua=mailto:admin@shaunjackson.space"`
+- Value: `"v=DMARC1; p=quarantine; rua=mailto:admin@userjackson.space"`
 
 ### Configure Spam Filter
 1. System Settings → Antispam
@@ -104,7 +104,7 @@ Add this TXT record for better deliverability:
 ## 🧪 Testing Your Email
 
 ### 1. Internal Test
-- Send email from admin@shaunjackson.space to itself
+- Send email from admin@userjackson.space to itself
 - Should arrive instantly
 
 ### 2. External Test
@@ -118,8 +118,8 @@ Add this TXT record for better deliverability:
 
 ### 4. Check DNS
 - Visit: mxtoolbox.com
-- Test: "MX Lookup" for shaunjackson.space
-- Should show mail.shaunjackson.space
+- Test: "MX Lookup" for userjackson.space
+- Should show mail.userjackson.space
 
 ## 🚨 Troubleshooting
 
@@ -158,8 +158,8 @@ docker exec poste postqueue -p  # Mail queue
 ## 🎉 Success!
 
 Once DNS propagates, you'll have:
-- Professional email: admin@shaunjackson.space
-- Webmail at: https://mail.shaunjackson.space
+- Professional email: admin@userjackson.space
+- Webmail at: https://mail.userjackson.space
 - Full IMAP/SMTP for any email client
 - Unlimited email accounts for your domain
 

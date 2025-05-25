@@ -44,7 +44,7 @@ async function loadEnvironments() {
       {
         name: 'homelab-test',
         type: 'test',
-        server: '192.168.10.20',
+        server: 'YOUR_TEST_SERVER_IP',
         protected: true,
         requiresApproval: false,
         description: 'Your personal test server - protected from overwrites'
@@ -52,7 +52,7 @@ async function loadEnvironments() {
       {
         name: 'homelab-staging',
         type: 'staging',
-        server: '192.168.10.21',
+        server: 'YOUR_STAGING_SERVER_IP',
         protected: false,
         requiresApproval: false,
         description: 'Staging environment for acceptance testing'
@@ -60,7 +60,7 @@ async function loadEnvironments() {
       {
         name: 'homelab-production',
         type: 'production',
-        server: '192.168.10.22',
+        server: 'YOUR_PRODUCTION_SERVER_IP',
         protected: true,
         requiresApproval: true,
         description: 'Production environment - requires approval'

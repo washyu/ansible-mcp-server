@@ -22,7 +22,7 @@ docker restart prometheus
 
 ### Poste.io Mail
 - [ ] Complete setup wizard
-- [ ] Create admin@shaunjackson.space
+- [ ] Create admin@userjackson.space
 - [ ] Configure spam settings
 
 ### Keycloak

@@ -79,7 +79,7 @@ async function sendMCPRequest(method, params = {}, id = 1) {
         PROXMOX_HOST: 'test.proxmox.local',
         PROXMOX_USER: 'test@pam',
         PROXMOX_PASSWORD: 'test-password',
-        DEFAULT_GATEWAY: '192.168.100.1',
+        DEFAULT_GATEWAY: 'localhost',
         DEFAULT_NAMESERVER: '8.8.8.8'
       }
     });
@@ -190,11 +190,11 @@ async function setup() {
   
   // Create test inventory
   const inventoryContent = `[webservers]
-web1 ansible_host=192.168.100.11
-web2 ansible_host=192.168.100.12
+web1 ansible_host=localhost
+web2 ansible_host=localhost
 
 [databases]
-db1 ansible_host=192.168.100.21
+db1 ansible_host=localhost
 
 [all:vars]
 ansible_user=ubuntu
@@ -449,7 +449,7 @@ resource "null_resource" "test" {
     const response = await sendMCPRequest('tools/call', {
       name: 'setup-network',
       arguments: {
-        gateway: '192.168.100.1',
+        gateway: 'localhost',
         nameserver: '8.8.8.8',
         networkCidr: '24'
       }
@@ -462,8 +462,8 @@ resource "null_resource" "test" {
     const response = await sendMCPRequest('tools/call', {
       name: 'setup-services',
       arguments: {
-        nextcloudIp: '192.168.100.50',
-        mailserverIp: '192.168.100.51'
+        nextcloudIp: 'localhost',
+        mailserverIp: 'localhost'
       }
     }, 121);
     

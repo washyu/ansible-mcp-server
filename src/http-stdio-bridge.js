@@ -4,7 +4,7 @@
 import { createInterface } from 'readline';
 import http from 'http';
 
-const MCP_SERVER_URL = process.env.MCP_SERVER_URL || 'http://192.168.10.100:3000';
+const MCP_SERVER_URL = process.env.MCP_SERVER_URL || 'http://YOUR_MCP_SERVER_IP:3000';
 
 const rl = createInterface({
   input: process.stdin,

@@ -6,7 +6,7 @@ import EventSource from 'eventsource';
 import http from 'http';
 import https from 'https';
 
-const SSE_URL = process.env.MCP_SSE_URL || 'http://192.168.10.100:3001/sse';
+const SSE_URL = process.env.MCP_SSE_URL || 'http://YOUR_MCP_SERVER_IP:3001/sse';
 const API_TOKEN = process.env.API_ACCESS_TOKEN || 'your-secure-token';
 
 let sessionId = null;

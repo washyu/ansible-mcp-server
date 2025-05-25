@@ -47,7 +47,7 @@ environment:
   - GF_AUTH_GENERIC_OAUTH_API_URL=https://graph.microsoft.com/v1.0/me
   - GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH=mail
   - GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH=mail=="washyu@hotmail.com" && "Admin" || "Viewer"
-  - GF_SERVER_ROOT_URL=http://grafana.shaunjackson.space
+  - GF_SERVER_ROOT_URL=http://grafana.userjackson.space
 ```
 
 #### Portainer Configuration
@@ -58,14 +58,14 @@ environment:
 5. Authorization URL: `https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize`
 6. Access Token URL: `https://login.microsoftonline.com/consumers/oauth2/v2.0/token`
 7. Resource URL: `https://graph.microsoft.com/v1.0/me`
-8. Redirect URL: `http://portainer.shaunjackson.space`
+8. Redirect URL: `http://portainer.userjackson.space`
 9. User Identifier: `mail`
 10. Scopes: `openid email profile`
 
 ### 5. Add Redirect URIs in Azure
 For each service, add redirect URIs:
-- `http://grafana.shaunjackson.space/login/generic_oauth`
-- `http://portainer.shaunjackson.space`
+- `http://grafana.userjackson.space/login/generic_oauth`
+- `http://portainer.userjackson.space`
 - Add more as needed
 
 ### 6. Services That Support Microsoft OAuth
@@ -91,13 +91,13 @@ docker rm keycloak-simple
 1. **No maintenance** - Microsoft handles updates/security
 2. **Single password** - Use your existing Microsoft account
 3. **2FA included** - If enabled on your Microsoft account
-4. **No resource usage** - Frees up memory/CPU on homelab2
+4. **No resource usage** - Frees up memory/CPU on test-server
 5. **Always available** - Even if your homelab is down
 
 ## Quick Test
 After setup, test with:
 ```bash
-curl -I http://grafana.shaunjackson.space/login/generic_oauth
+curl -I http://grafana.userjackson.space/login/generic_oauth
 ```
 
 You should be redirected to Microsoft login.

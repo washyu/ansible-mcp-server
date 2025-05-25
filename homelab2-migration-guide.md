@@ -2,20 +2,20 @@
 
 ## Current Situation Discovery ✅
 - **Proxmox Host**: 192.168.10.200 (root user, password auth)
-- **homelab2**: 192.168.10.20 (existing Ansible controller, user: shaun)
+- **test-server**: 192.168.10.20 (existing Ansible controller, user: user)
 - **MCP Server**: Needs sshpass for Proxmox discovery
 - **Network**: 192.168.10.0/24
 
 ## Migration Strategy Options
 
 ### Option 1: Full Migration (Recommended)
-**Migrate everything from homelab2 to MCP server, then repurpose homelab2**
+**Migrate everything from test-server to MCP server, then repurpose test-server**
 
 ### Option 2: Gradual Migration  
-**Keep homelab2 running while MCP takes over incrementally**
+**Keep test-server running while MCP takes over incrementally**
 
 ### Option 3: Proxy Mode
-**MCP uses homelab2 as the actual Ansible controller**
+**MCP uses test-server as the actual Ansible controller**
 
 ---
 
@@ -34,7 +34,7 @@ install-dependencies --packages='["sshpass", "ansible"]' --target="local"
 # Discover your existing Ansible controller
 discover-ansible-controller --networkRange="192.168.10.0/24"
 
-# Expected result: Should find homelab2 (192.168.10.20) with user 'shaun'
+# Expected result: Should find test-server (192.168.10.20) with user 'user'
 ```
 
 #### 3. Discover All Proxmox VMs
@@ -42,7 +42,7 @@ discover-ansible-controller --networkRange="192.168.10.0/24"
 # Now that sshpass is installed, discover all VMs
 discover-proxmox --host="192.168.10.200" --user="root@pam" --node="proxmox"
 
-# This should show homelab2 and any other VMs you have
+# This should show test-server and any other VMs you have
 ```
 
 ### Phase 2: Set Up SSH Key Authentication
@@ -55,8 +55,8 @@ manage-ssh-keys --action="generate" --keyType="ed25519" --forceOverwrite=false
 
 #### 5. Distribute Keys to All Hosts
 ```bash
-# Add MCP's key to homelab2 (will need shaun's password)
-manage-ssh-keys --action="distribute" --targets='["192.168.10.20"]' --username="shaun"
+# Add MCP's key to test-server (will need user's password)
+manage-ssh-keys --action="distribute" --targets='["192.168.10.20"]' --username="user"
 
 # Add MCP's key to Proxmox host (will need root password)  
 manage-ssh-keys --action="distribute" --targets='["192.168.10.200"]' --username="root"
@@ -67,12 +67,12 @@ manage-ssh-keys --action="test" --targets='["192.168.10.20", "192.168.10.200"]'
 
 ### Phase 3: Import Existing Configuration
 
-#### 6. Import from homelab2
+#### 6. Import from test-server
 ```bash
-# Import Ansible configuration from homelab2
+# Import Ansible configuration from test-server
 import-ansible-config \
   --controllerHost="192.168.10.20" \
-  --username="shaun" \
+  --username="user" \
   --authMethod="key" \
   --mergeStrategy="prompt"
 
@@ -83,39 +83,39 @@ import-ansible-config \
 Based on the import-ansible-config output, you may need to manually copy:
 ```bash
 # Example commands (adjust paths as needed)
-scp shaun@192.168.10.20:/home/shaun/ansible/inventory/* ./inventory/
-scp -r shaun@192.168.10.20:/home/shaun/ansible/playbooks/* ./playbooks/
-scp -r shaun@192.168.10.20:/home/shaun/ansible/roles/* ./roles/
+scp user@192.168.10.20:/home/user/ansible/inventory/* ./inventory/
+scp -r user@192.168.10.20:/home/user/ansible/playbooks/* ./playbooks/
+scp -r user@192.168.10.20:/home/user/ansible/roles/* ./roles/
 ```
 
 ### Phase 4: Test MCP Control
 
 #### 8. Test Direct Control
 ```bash
-# Test that MCP can now control homelab2 directly
+# Test that MCP can now control test-server directly
 test-server-connectivity --hostname="192.168.10.20" --method="ssh"
 
 # Test that MCP can control Proxmox
 test-server-connectivity --hostname="192.168.10.200" --method="ssh"
 ```
 
-#### 9. Add homelab2 as External Server
+#### 9. Add test-server as External Server
 ```bash
-# Add homelab2 to the MCP inventory as an external server
+# Add test-server to the MCP inventory as an external server
 add-external-server \
   --hostname="192.168.10.20" \
-  --alias="homelab2-original-controller" \
+  --alias="test-server-original-controller" \
   --type="generic" \
   --purpose="Former Ansible controller, now managed by MCP" \
-  --connection='{"method":"ssh","username":"shaun"}' \
+  --connection='{"method":"ssh","username":"user"}' \
   --groups='["ansible_controllers", "dev_servers"]'
 ```
 
-### Phase 5: Decision Point - What to do with homelab2?
+### Phase 5: Decision Point - What to do with test-server?
 
 #### Option A: Retire as Controller, Repurpose
 ```bash
-# homelab2 becomes a regular managed server
+# test-server becomes a regular managed server
 # You can now use it for:
 # - Development environment
 # - Testing new playbooks
@@ -125,7 +125,7 @@ add-external-server \
 
 #### Option B: Keep as Secondary Controller
 ```bash
-# Keep homelab2 as a backup controller
+# Keep test-server as a backup controller
 # Useful for:
 # - Disaster recovery
 # - Testing new MCP features
@@ -134,7 +134,7 @@ add-external-server \
 
 #### Option C: Remove Completely
 ```bash
-# If you don't need homelab2 anymore
+# If you don't need test-server anymore
 remove-external-server --hostname="192.168.10.20"
 # Then delete the VM in Proxmox
 ```
@@ -166,7 +166,7 @@ ansible-playbook ./playbooks/test-connectivity.yml --inventory="./inventory/comp
 ## Migration Benefits
 
 ### Before Migration
-- ✅ homelab2 controls some infrastructure
+- ✅ test-server controls some infrastructure
 - ❌ Limited to basic Ansible functionality
 - ❌ Manual VM management in Proxmox
 - ❌ No service catalog or automation
@@ -189,18 +189,18 @@ ansible-playbook ./playbooks/test-connectivity.yml --inventory="./inventory/comp
 
 If something goes wrong, you can rollback:
 
-1. **SSH back into homelab2** using original credentials
-2. **Remove MCP's SSH key** from homelab2: `nano ~/.ssh/authorized_keys`
-3. **Continue using homelab2** as your Ansible controller
+1. **SSH back into test-server** using original credentials
+2. **Remove MCP's SSH key** from test-server: `nano ~/.ssh/authorized_keys`
+3. **Continue using test-server** as your Ansible controller
 4. **Fix MCP issues** and retry migration
 
 ---
 
 ## Troubleshooting
 
-### Issue: Can't discover homelab2
+### Issue: Can't discover test-server
 ```bash
-# Check if homelab2 is responding
+# Check if test-server is responding
 test-server-connectivity --hostname="192.168.10.20" --method="ping"
 test-server-connectivity --hostname="192.168.10.20" --method="ssh" --port=22
 ```
@@ -208,7 +208,7 @@ test-server-connectivity --hostname="192.168.10.20" --method="ssh" --port=22
 ### Issue: SSH key distribution fails
 ```bash
 # Try manual key distribution
-ssh-copy-id shaun@192.168.10.20
+ssh-copy-id user@192.168.10.20
 ```
 
 ### Issue: Proxmox discovery fails
@@ -222,7 +222,7 @@ test-server-connectivity --hostname="192.168.10.200" --method="ssh" --port=22
 
 ### Issue: Import fails
 ```bash
-# Check what's actually on homelab2
+# Check what's actually on test-server
 discover-ansible-controller --networkRange="192.168.10.20/32"
 ```
 
@@ -241,5 +241,5 @@ Ready to start the migration? 🚀
 
 Let me know which approach you'd prefer:
 - **Full migration** (take over completely)
-- **Gradual migration** (test alongside homelab2)  
-- **Proxy mode** (use homelab2 as backend)
+- **Gradual migration** (test alongside test-server)  
+- **Proxy mode** (use test-server as backend)

@@ -61,62 +61,62 @@ A     npm        68.111.95.149
 3. **Add Proxy Hosts** (in this order):
 
 #### Main Website
-- Domain: `shaunjackson.space`
+- Domain: `userjackson.space`
 - Forward to: `192.168.10.108:8888`
-- Also add: `www.shaunjackson.space`
+- Also add: `www.userjackson.space`
 - Enable SSL, Force SSL, HTTP/2, HSTS
 
 #### Heimdall Dashboard
-- Domain: `heimdall.shaunjackson.space`
+- Domain: `heimdall.userjackson.space`
 - Forward to: `192.168.10.108:8080`
 - Enable all SSL options
 
 #### Grafana
-- Domain: `grafana.shaunjackson.space`
+- Domain: `grafana.userjackson.space`
 - Forward to: `192.168.10.108:3000`
 - Enable all SSL options
 
 #### Portainer
-- Domain: `portainer.shaunjackson.space`
+- Domain: `portainer.userjackson.space`
 - Forward to: `192.168.10.108:9000`
 - Enable all SSL options
 
 #### Keycloak (Auth)
-- Domain: `auth.shaunjackson.space`
+- Domain: `auth.userjackson.space`
 - Forward to: `192.168.10.108:8090`
 - Enable all SSL options
 
 #### NPM Admin
-- Domain: `npm.shaunjackson.space`
+- Domain: `npm.userjackson.space`
 - Forward to: `192.168.10.108:81`
 - Enable all SSL options
 
 #### Pi-hole
-- Domain: `pihole.shaunjackson.space`
+- Domain: `pihole.userjackson.space`
 - Forward to: `192.168.10.1:80`
 - Enable all SSL options
 
 #### Proxmox
-- Domain: `proxmox.shaunjackson.space`
+- Domain: `proxmox.userjackson.space`
 - Forward to: `192.168.10.20:8006`
 - Scheme: `https` (not http)
 - Enable all SSL options
 
 #### TrueNAS
-- Domain: `truenas.shaunjackson.space`
+- Domain: `truenas.userjackson.space`
 - Forward to: `192.168.10.30:80`
 - Enable all SSL options
 
 ### Step 4: Configure Keycloak
 
-1. **Access**: https://auth.shaunjackson.space (after NPM setup)
+1. **Access**: https://auth.userjackson.space (after NPM setup)
 2. **Login**: admin / ChangeMe123!
 3. **Create Realm**:
    - Name: `homelab`
    - Display name: `Homelab SSO`
 
 4. **Create User**:
-   - Username: `shaun`
+   - Username: `user`
    - Email: your email
    - Email Verified: ON
    - Set permanent password
@@ -125,7 +125,7 @@ A     npm        68.111.95.149
    - Create client: `grafana`
    - Client Protocol: `openid-connect`
    - Access Type: `confidential`
-   - Valid Redirect URIs: `https://grafana.shaunjackson.space/*`
+   - Valid Redirect URIs: `https://grafana.userjackson.space/*`
    - Get client secret from Credentials tab
 
 ### Step 5: Update Services Configuration
@@ -140,9 +140,9 @@ allow_sign_up = true
 client_id = grafana
 client_secret = <from-keycloak>
 scopes = openid email profile
-auth_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect/auth
-token_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect/token
-api_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect/userinfo
+auth_url = https://auth.userjackson.space/realms/homelab/protocol/openid-connect/auth
+token_url = https://auth.userjackson.space/realms/homelab/protocol/openid-connect/token
+api_url = https://auth.userjackson.space/realms/homelab/protocol/openid-connect/userinfo
 ```
 
 ## 🔒 Security Checklist
@@ -156,15 +156,15 @@ api_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect
 
 ## 🎯 Quick Access Links (After Setup)
 
-- **Main Site**: https://shaunjackson.space
-- **Dashboard**: https://heimdall.shaunjackson.space
-- **Monitoring**: https://grafana.shaunjackson.space
-- **Docker**: https://portainer.shaunjackson.space
-- **Auth**: https://auth.shaunjackson.space
-- **Proxy**: https://npm.shaunjackson.space
-- **DNS**: https://pihole.shaunjackson.space
-- **VMs**: https://proxmox.shaunjackson.space
-- **Storage**: https://truenas.shaunjackson.space
+- **Main Site**: https://userjackson.space
+- **Dashboard**: https://heimdall.userjackson.space
+- **Monitoring**: https://grafana.userjackson.space
+- **Docker**: https://portainer.userjackson.space
+- **Auth**: https://auth.userjackson.space
+- **Proxy**: https://npm.userjackson.space
+- **DNS**: https://pihole.userjackson.space
+- **VMs**: https://proxmox.userjackson.space
+- **Storage**: https://truenas.userjackson.space
 
 ## 📝 Passwords to Remember
 

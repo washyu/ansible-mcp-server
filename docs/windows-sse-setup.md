@@ -40,7 +40,7 @@ Windows Machine                    Linux Server
 1. **Deploy the SSE server** (if not already running):
    ```bash
    # SSH into your MCP server
-   ssh ubuntu@192.168.10.100
+   ssh ubuntu@YOUR_MCP_SERVER_IP
    
    # Navigate to MCP directory
    cd /opt/ansible-mcp-server
@@ -78,7 +78,7 @@ Windows Machine                    Linux Server
    ```
 
 2. **Enter configuration when prompted**:
-   - MCP server IP: `192.168.10.100` (your server's IP)
+   - MCP server IP: `YOUR_MCP_SERVER_IP` (your server's IP)
    - SSE port: `3001` (press Enter for default)
    - API token: Enter the token from your server's `.env` file
 
@@ -116,7 +116,7 @@ If you prefer manual setup:
 5. **Create batch wrapper** (`mcp-proxy.bat`):
    ```batch
    @echo off
-   set MCP_SSE_URL=http://192.168.10.100:3001/sse
+   set MCP_SSE_URL=http://YOUR_MCP_SERVER_IP:3001/sse
    set API_ACCESS_TOKEN=your-secure-token
    node "%~dp0mcp-proxy-client.js" %*
    ```
@@ -139,7 +139,7 @@ If you prefer manual setup:
 1. **Test SSE server directly**:
    ```powershell
    # From Windows, test if you can reach the server
-   curl http://192.168.10.100:3001/health
+   curl http://YOUR_MCP_SERVER_IP:3001/health
    ```
 
 2. **Test proxy client**:
@@ -176,7 +176,7 @@ If you prefer manual setup:
 3. **Test network connectivity**:
    ```powershell
    # From Windows
-   Test-NetConnection -ComputerName 192.168.10.100 -Port 3001
+   Test-NetConnection -ComputerName YOUR_MCP_SERVER_IP -Port 3001
    ```
 
 ### Authentication Errors

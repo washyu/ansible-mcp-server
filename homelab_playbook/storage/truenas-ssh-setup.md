@@ -27,7 +27,7 @@ To enable password authentication for SSH on TrueNAS:
    - In the SSH Public Key field, paste this key:
 
 ```
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDu4P1Z8C5b4s+SuQ9pLPy6pASkeD6PdOzbfUcVVSWJ1 shaun@homelab2
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDu4P1Z8C5b4s+SuQ9pLPy6pASkeD6PdOzbfUcVVSWJ1 user@test-server
 ```
 
 After making these changes, we can test the connection again.

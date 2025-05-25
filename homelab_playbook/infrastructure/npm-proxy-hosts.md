@@ -4,14 +4,14 @@
 
 | Domain | Forward IP | Forward Port | Service |
 |--------|------------|--------------|---------|
-| heimdall.shaunjackson.space | 192.168.10.20 | 8888 | Heimdall Dashboard |
-| auth.shaunjackson.space | 192.168.10.20 | 8090 | Keycloak |
-| grafana.shaunjackson.space | 192.168.10.20 | 3000 | Grafana |
-| portainer.shaunjackson.space | 192.168.10.164 | 9443 | Portainer (TrueNAS) |
-| proxmox.shaunjackson.space | 192.168.10.200 | 8006 | Proxmox |
-| truenas.shaunjackson.space | 192.168.10.164 | 443 | TrueNAS |
-| mail.shaunjackson.space | 192.168.10.20 | 8085 | Poste.io |
-| webmail.shaunjackson.space | 192.168.10.20 | 8085 | Poste.io Webmail |
+| heimdall.userjackson.space | 192.168.10.20 | 8888 | Heimdall Dashboard |
+| auth.userjackson.space | 192.168.10.20 | 8090 | Keycloak |
+| grafana.userjackson.space | 192.168.10.20 | 3000 | Grafana |
+| portainer.userjackson.space | 192.168.10.164 | 9443 | Portainer (TrueNAS) |
+| proxmox.userjackson.space | 192.168.10.200 | 8006 | Proxmox |
+| truenas.userjackson.space | 192.168.10.164 | 443 | TrueNAS |
+| mail.userjackson.space | 192.168.10.20 | 8085 | Poste.io |
+| webmail.userjackson.space | 192.168.10.20 | 8085 | Poste.io Webmail |
 
 ## For each host:
 1. Click "Add Proxy Host"
@@ -24,7 +24,7 @@
 3. SSL tab:
    - SSL Certificate: "Request a new SSL Certificate"
    - Enable "Force SSL"
-   - Email: admin@shaunjackson.space
+   - Email: admin@userjackson.space
    - Agree to Terms
 4. Save
 

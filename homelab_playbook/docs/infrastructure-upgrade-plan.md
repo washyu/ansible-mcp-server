@@ -1,11 +1,11 @@
 # Homelab Infrastructure Upgrade Plan
-Domain: shaunjackson.space
+Domain: userjackson.space
 
 ## Current State Analysis
 
 ### Current IP Addresses (DHCP)
 - **linuxrwifi**: 192.168.10.1, 192.168.50.92 (Pi-hole DNS)
-- **homelab2**: 192.168.10.108 (Management)
+- **test-server**: 192.168.10.108 (Management)
 - **truenas**: 192.168.10.164 (Storage)
 - **amdaiserver**: 192.168.10.200 (Proxmox)
 
@@ -25,7 +25,7 @@ Domain: shaunjackson.space
 192.168.10.1    - Router/Gateway (linuxrwifi)
 192.168.10.2-9  - Reserved for network equipment
 
-192.168.10.10   - homelab2 (Management/Ansible)
+192.168.10.10   - test-server (Management/Ansible)
 192.168.10.11   - Keycloak (SSO) - VM on Proxmox
 192.168.10.12   - Nginx Proxy Manager - VM on Proxmox
 192.168.10.13-19 - Reserved for future services
@@ -53,22 +53,22 @@ Domain: shaunjackson.space
    - Friendly URLs for all services
 
 3. **External DNS** (Cloudflare/etc)
-   - Point *.shaunjackson.space to home IP
+   - Point *.userjackson.space to home IP
    - Use dynamic DNS if needed
 
 ### 3. Service URLs (via reverse proxy)
 ```
-proxmox.shaunjackson.space    -> 192.168.10.20:8006
-truenas.shaunjackson.space    -> 192.168.10.30:80
-pihole.shaunjackson.space     -> 192.168.10.1:80
-keycloak.shaunjackson.space   -> 192.168.10.11:8080
-npm.shaunjackson.space        -> 192.168.10.12:81
-ansible.shaunjackson.space    -> 192.168.10.10:8080 (future web UI)
+proxmox.userjackson.space    -> 192.168.10.20:8006
+truenas.userjackson.space    -> 192.168.10.30:80
+pihole.userjackson.space     -> 192.168.10.1:80
+keycloak.userjackson.space   -> 192.168.10.11:8080
+npm.userjackson.space        -> 192.168.10.12:81
+ansible.userjackson.space    -> 192.168.10.10:8080 (future web UI)
 ```
 
 ### 4. Website Update
 - Static site with server status dashboard
-- Can be hosted on homelab2 or as GitHub Pages
+- Can be hosted on test-server or as GitHub Pages
 - Auto-update via Ansible playbook
 
 ## Implementation Steps
@@ -103,7 +103,7 @@ ansible.shaunjackson.space    -> 192.168.10.10:8080 (future web UI)
 2. `deploy-keycloak.yml` - Deploy Keycloak
 3. `deploy-nginx-proxy-manager.yml` - Deploy NPM
 4. `configure-reverse-proxy.yml` - Set up domains
-5. `update-website.yml` - Update shaunjackson.space
+5. `update-website.yml` - Update userjackson.space
 
 ## Next Steps
 1. Review and approve IP scheme

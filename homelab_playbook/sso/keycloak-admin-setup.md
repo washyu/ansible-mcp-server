@@ -12,7 +12,7 @@
 
 ### Step 2: Assign Role to Your User
 1. Left menu → Users
-2. Click on `shaun`
+2. Click on `user`
 3. Go to "Role mapping" tab
 4. Click "Assign role"
 5. Filter by: "Filter by realm roles"
@@ -29,7 +29,7 @@
 ### Step 2: Add User to Group
 1. Still in Groups → Click `admins`
 2. Members tab → Add member
-3. Search for `shaun`
+3. Search for `user`
 4. Select and click Add
 
 ### Step 3: Assign Roles to Group
@@ -56,7 +56,7 @@ If you just want Grafana admin access without setting up roles:
 
 1. In Grafana's OAuth config, change:
 ```
-role_attribute_path = email == 'shaun@shaunjackson.space' && 'Admin' || 'Viewer'
+role_attribute_path = email == 'user@userjackson.space' && 'Admin' || 'Viewer'
 ```
 
 This gives admin access based on your email address.

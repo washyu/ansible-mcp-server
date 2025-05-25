@@ -1,0 +1,7 @@
+---
+- name: restart service
+  debug:
+    msg: 'Handler: restart service'
+- name: reload config
+  debug:
+    msg: 'Handler: reload config'

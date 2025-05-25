@@ -407,7 +407,7 @@ Please run the following setup commands in order:
 
 2. Configure Network Settings:
    setup-network with your network configuration
-   - gateway: Your network gateway (e.g., 192.168.1.1)
+   - gateway: Your network gateway (e.g., YOUR_GATEWAY_IP)
    - nameserver: DNS server (default: 8.8.8.8)
    - networkCidr: Network prefix (default: 24)
 

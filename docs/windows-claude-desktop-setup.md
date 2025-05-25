@@ -39,7 +39,7 @@ Edit Claude Desktop configuration file:
       "args": [
         "-i", "C:\\Users\\YourName\\.ssh\\mcp_key",
         "-o", "StrictHostKeyChecking=no",
-        "mcp@192.168.10.100",
+        "mcp@YOUR_MCP_SERVER_IP",
         "/home/mcp/mcp-ssh-wrapper.sh"
       ],
       "env": {}
@@ -56,7 +56,7 @@ Create/edit `C:\Users\YourName\.ssh\config`:
 
 ```
 Host mcp-server
-    HostName 192.168.10.100
+    HostName YOUR_MCP_SERVER_IP
     User mcp
     IdentityFile ~/.ssh/mcp_key
     StrictHostKeyChecking no
@@ -82,7 +82,7 @@ Host mcp-server
 
 1. Open PuTTY
 2. Create a new session named "mcp-server"
-3. Set hostname: `192.168.10.100`
+3. Set hostname: `YOUR_MCP_SERVER_IP`
 4. Set username: `mcp`
 5. Add your private key in Connection > SSH > Auth
 6. Save the session
@@ -117,7 +117,7 @@ Host mcp-server
 
 1. Test SSH connection manually:
    ```powershell
-   ssh mcp@192.168.10.100 "/home/mcp/mcp-ssh-wrapper.sh"
+   ssh mcp@YOUR_MCP_SERVER_IP "/home/mcp/mcp-ssh-wrapper.sh"
    ```
 
 2. Check firewall on MCP server:
@@ -127,7 +127,7 @@ Host mcp-server
 
 3. Verify MCP server is running:
    ```bash
-   ssh mcp@192.168.10.100 "ps aux | grep node"
+   ssh mcp@YOUR_MCP_SERVER_IP "ps aux | grep node"
    ```
 
 ### Permission Denied
@@ -139,19 +139,19 @@ Host mcp-server
 
 2. Verify authorized_keys on server:
    ```bash
-   ssh mcp@192.168.10.100 "cat ~/.ssh/authorized_keys"
+   ssh mcp@YOUR_MCP_SERVER_IP "cat ~/.ssh/authorized_keys"
    ```
 
 ### MCP Commands Not Working
 
 1. Test MCP server directly:
    ```bash
-   ssh mcp@192.168.10.100 "cd /opt/ansible-mcp-server && node src/index.js"
+   ssh mcp@YOUR_MCP_SERVER_IP "cd /opt/ansible-mcp-server && node src/index.js"
    ```
 
 2. Check Node.js installation:
    ```bash
-   ssh mcp@192.168.10.100 "node --version"
+   ssh mcp@YOUR_MCP_SERVER_IP "node --version"
    ```
 
 ## Using the MCP Server

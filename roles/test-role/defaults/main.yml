@@ -1,0 +1,3 @@
+---
+# Default variables for test-role
+test-role_enabled: true

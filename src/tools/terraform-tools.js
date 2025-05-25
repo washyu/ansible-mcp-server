@@ -131,7 +131,7 @@ resource "proxmox_vm_qemu" "${name}" {
   }
   
   ${network?.ip ? `
-  ipconfig0 = "ip=${network.ip}/24,gw=${network.gateway || '192.168.1.1'}"
+  ipconfig0 = "ip=${network.ip}/24,gw=${network.gateway || 'YOUR_GATEWAY_IP'}"
   nameserver = "${network.nameserver || '8.8.8.8'}"
   ` : ''}
   
@@ -269,7 +269,7 @@ const terraformTools = [
       const tfvarsExample = `# Proxmox API credentials
 proxmox_api_token_id = "root@pam!ansible"
 proxmox_api_token_secret = "your-api-token-secret"
-proxmox_api_url = "https://192.168.1.100:8006/api2/json"
+proxmox_api_url = "https://YOUR_PROXMOX_HOST:8006/api2/json"
 `;
       await fs.writeFile(path.join(outputDir, 'terraform.tfvars.example'), tfvarsExample);
       

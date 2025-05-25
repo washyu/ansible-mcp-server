@@ -5,7 +5,7 @@ import { createInterface } from 'readline';
 console.log('Testing local MCP server...');
 
 const mcp = spawn('node', ['src/index.js'], {
-  cwd: '/home/shaun/ansible-mcp-server',
+  cwd: '/home/user/ansible-mcp-server',
   stdio: ['pipe', 'pipe', 'pipe']
 });
 

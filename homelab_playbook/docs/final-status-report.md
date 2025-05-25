@@ -5,14 +5,14 @@ Generated: May 23, 2025
 
 ### ✅ Successfully Connected Hosts (3/4 - 75%)
 
-1. **homelab2** (192.168.10.108)
+1. **test-server** (192.168.10.108)
    - Ubuntu 24.04 - Management Server
    - Ansible MCP Server installed and running
    - Local connection (no SSH needed)
 
 2. **linuxrwifi** (192.168.10.1)
    - Ubuntu 24.04 - DNS Server  
-   - SSH working with shaun user
+   - SSH working with user user
    - Note: sudo password in inventory needs updating
 
 3. **truenas** (192.168.10.164)
@@ -30,7 +30,7 @@ Generated: May 23, 2025
 ## Ansible MCP Server Deployment
 
 ### ✅ Successfully Deployed
-- **Location**: `/opt/ansible-mcp-server` on homelab2
+- **Location**: `/opt/ansible-mcp-server` on test-server
 - **Service**: `ansible-mcp-server.service` (systemd)
 - **Status**: Operational and ready for MCP clients
 
@@ -48,8 +48,8 @@ Generated: May 23, 2025
   "params": {
     "name": "ansible-playbook",
     "arguments": {
-      "playbook": "/home/shaun/ansible/playbooks/discover.yml",
-      "inventory": "/home/shaun/ansible/inventory/hosts"
+      "playbook": "/home/user/ansible/playbooks/discover.yml",
+      "inventory": "/home/user/ansible/inventory/hosts"
     }
   }
 }
@@ -80,7 +80,7 @@ Generated: May 23, 2025
 ### For amdaiserver (Proxmox):
 Add this SSH key to root's authorized_keys:
 ```
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINVDJsuBvpKdkvlJ7yitJJDFp76v0uJhwDTDHWlWpdex ansible@homelab2
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINVDJsuBvpKdkvlJ7yitJJDFp76v0uJhwDTDHWlWpdex ansible@test-server
 ```
 
 Or manually run from your machine:
@@ -91,11 +91,11 @@ ssh-copy-id root@192.168.10.200
 ### Quick Test Commands
 ```bash
 # Test all hosts
-ansible all -i /home/shaun/ansible/inventory/hosts -m ping
+ansible all -i /home/user/ansible/inventory/hosts -m ping
 
 # Run discovery on working hosts  
-ansible-playbook -i /home/shaun/ansible/inventory/hosts \
-  playbooks/discover.yml --limit 'homelab2,linuxrwifi,truenas'
+ansible-playbook -i /home/user/ansible/inventory/hosts \
+  playbooks/discover.yml --limit 'test-server,linuxrwifi,truenas'
 ```
 
 ## Summary

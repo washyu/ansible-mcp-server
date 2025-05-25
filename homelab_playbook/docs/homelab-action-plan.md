@@ -9,7 +9,7 @@
    ```
 
 2. **Configure Router**
-   - Port forward 80 & 443 to 192.168.10.108 (homelab2)
+   - Port forward 80 & 443 to 192.168.10.108 (test-server)
 
 3. **Access NPM**
    - http://192.168.10.108:81
@@ -17,7 +17,7 @@
    - Change password immediately!
 
 4. **Add First Proxy Host**
-   - Domain: heimdall.shaunjackson.space
+   - Domain: heimdall.userjackson.space
    - Forward to: localhost:8080
    - Enable SSL (Let's Encrypt)
 
@@ -28,7 +28,7 @@
    ```
 
 2. **Add to NPM**
-   - Domain: shaunjackson.space (and www)
+   - Domain: userjackson.space (and www)
    - Forward to: localhost:8888
 
 ### Phase 3: Authentication (1 hour)
@@ -38,7 +38,7 @@
    ```
 
 2. **Configure in NPM**
-   - Domain: auth.shaunjackson.space
+   - Domain: auth.userjackson.space
    - Forward to: localhost:8080
 
 3. **Setup Keycloak**
@@ -49,7 +49,7 @@
 ### Phase 4: Clean IP Scheme (Weekend Project)
 **Current → Proposed IPs:**
 - linuxrwifi: 192.168.10.1 → Keep as-is ✓
-- homelab2: 192.168.10.108 → 192.168.10.10
+- test-server: 192.168.10.108 → 192.168.10.10
 - amdaiserver: 192.168.10.200 → 192.168.10.20
 - truenas: 192.168.10.164 → 192.168.10.30
 
@@ -60,15 +60,15 @@
 
 ## Service URLs After Setup
 All accessible via HTTPS with valid certificates:
-- https://shaunjackson.space - Status dashboard
-- https://heimdall.shaunjackson.space - Service dashboard
-- https://portainer.shaunjackson.space - Docker management
-- https://grafana.shaunjackson.space - Monitoring
-- https://proxmox.shaunjackson.space - Virtualization
-- https://truenas.shaunjackson.space - Storage
-- https://pihole.shaunjackson.space - DNS management
-- https://auth.shaunjackson.space - SSO login
-- https://npm.shaunjackson.space - Proxy management
+- https://userjackson.space - Status dashboard
+- https://heimdall.userjackson.space - Service dashboard
+- https://portainer.userjackson.space - Docker management
+- https://grafana.userjackson.space - Monitoring
+- https://proxmox.userjackson.space - Virtualization
+- https://truenas.userjackson.space - Storage
+- https://pihole.userjackson.space - DNS management
+- https://auth.userjackson.space - SSO login
+- https://npm.userjackson.space - Proxy management
 
 ## DNS Configuration
 Option 1: If you use Cloudflare
@@ -80,14 +80,14 @@ Option 2: Individual records
 
 ## Important Notes
 1. **Prometheus is restarting** - Check configuration after NPM setup
-2. **Keycloak on homelab2** - Consider moving to Proxmox later
+2. **Keycloak on test-server** - Consider moving to Proxmox later
 3. **Backup everything** before IP migration
 4. **Document passwords** in a password manager
 
 ## Commands Summary
 ```bash
 # Deploy everything
-cd /home/shaun/ansible
+cd /home/user/ansible
 ansible-playbook -i inventory/hosts playbooks/deploy-nginx-proxy-manager.yml
 ansible-playbook -i inventory/hosts playbooks/create-status-website.yml
 ansible-playbook -i inventory/hosts playbooks/deploy-keycloak.yml

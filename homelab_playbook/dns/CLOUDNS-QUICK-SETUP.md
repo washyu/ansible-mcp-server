@@ -21,9 +21,9 @@
 - Note your auth-id (usually your email)
 - Set an API password
 
-## 4. Deploy on homelab2
+## 4. Deploy on test-server
 ```bash
-cd /home/shaun/ansible-mcp-server
+cd /home/user/ansible-mcp-server
 
 # Edit the docker-compose file
 nano cloudns-docker-compose.yml
@@ -66,7 +66,7 @@ tail -f ./cloudns-logs/cloudns-ddns.log
 dig yourname.cloudns.net
 
 # Test a service
-curl -I https://www.shaunjackson.space
+curl -I https://www.userjackson.space
 ```
 
 ## Why ClouDNS?

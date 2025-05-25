@@ -1,7 +1,7 @@
 # Homelab Setup Tasks
 
 ## Current Status
-- **Domain**: shaunjackson.space → 68.111.95.149 (your public IP)
+- **Domain**: userjackson.space → 68.111.95.149 (your public IP)
 - **Existing Services**:
   - Heimdall (Dashboard) on ports 8080/8443
   - Grafana (Monitoring) on port 3000
@@ -11,7 +11,7 @@
 ## Implementation Plan
 
 ### Step 1: Deploy Reverse Proxy (Nginx Proxy Manager)
-Since you already have Docker on homelab2, we'll deploy NPM there first:
+Since you already have Docker on test-server, we'll deploy NPM there first:
 
 ```bash
 # Deploy Nginx Proxy Manager
@@ -30,12 +30,12 @@ Default login: admin@example.com / changeme
 
 ### Step 2: Configure Subdomains
 After NPM is running, configure these proxy hosts:
-- `heimdall.shaunjackson.space` → localhost:8080
-- `grafana.shaunjackson.space` → localhost:3000
-- `portainer.shaunjackson.space` → localhost:9000
-- `pihole.shaunjackson.space` → 192.168.10.1:80
-- `proxmox.shaunjackson.space` → 192.168.10.20:8006
-- `truenas.shaunjackson.space` → 192.168.10.30:80
+- `heimdall.userjackson.space` → localhost:8080
+- `grafana.userjackson.space` → localhost:3000
+- `portainer.userjackson.space` → localhost:9000
+- `pihole.userjackson.space` → 192.168.10.1:80
+- `proxmox.userjackson.space` → 192.168.10.20:8006
+- `truenas.userjackson.space` → 192.168.10.30:80
 
 ### Step 3: Deploy Keycloak for SSO
 We'll deploy Keycloak on Proxmox as an LXC container:
@@ -57,7 +57,7 @@ Create a simple status page showing all services
 
 ### 1. Deploy NPM right now:
 ```bash
-ssh shaun@homelab2
+ssh user@test-server
 docker run -d \
   --name nginx-proxy-manager \
   --restart unless-stopped \
@@ -70,11 +70,11 @@ docker run -d \
 ```
 
 ### 2. Configure router port forwarding:
-- Forward ports 80 and 443 to homelab2 (192.168.10.108)
+- Forward ports 80 and 443 to test-server (192.168.10.108)
 
 ### 3. Access NPM:
 - Local: http://192.168.10.108:81
-- After setup: https://npm.shaunjackson.space
+- After setup: https://npm.userjackson.space
 
 ## Ansible Playbooks Created
 1. `static-ip-migration.yml` - Migrate to static IPs
@@ -84,4 +84,4 @@ docker run -d \
 1. Deploy Nginx Proxy Manager (5 minutes)
 2. Configure port forwarding on router
 3. Set up first proxy host for Heimdall
-4. Test with heimdall.shaunjackson.space
+4. Test with heimdall.userjackson.space

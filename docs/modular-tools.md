@@ -29,7 +29,7 @@ The MCP now remembers information between sessions:
 
 ```bash
 # Store context
-claude "Remember that my Pi-hole is at 192.168.1.10"
+claude "Remember that my Pi-hole is at YOUR_GATEWAY_IP0"
 
 # Retrieved automatically in future sessions
 claude "Check my Pi-hole stats"

@@ -3,7 +3,7 @@ Generated: May 23, 2025
 
 ## ✅ All Hosts Successfully Connected (4/4 - 100%)
 
-### 1. homelab2 (192.168.10.108)
+### 1. test-server (192.168.10.108)
 - **Role**: Management Server
 - **OS**: Ubuntu 24.04
 - **Memory**: 7.4GB
@@ -15,7 +15,7 @@ Generated: May 23, 2025
 - **Role**: DNS Server
 - **OS**: Ubuntu 24.04
 - **Memory**: 7.4GB
-- **Connection**: SSH (shaun user)
+- **Connection**: SSH (user user)
 - **Status**: ✅ Fully operational
 
 ### 3. truenas (192.168.10.164)
@@ -37,7 +37,7 @@ Generated: May 23, 2025
 
 ## Ansible MCP Server
 - **Status**: ✅ Deployed and operational
-- **Location**: homelab2:/opt/ansible-mcp-server
+- **Location**: test-server:/opt/ansible-mcp-server
 - **Service**: ansible-mcp-server.service
 
 ## Available Tools via MCP
@@ -50,22 +50,22 @@ Generated: May 23, 2025
 
 ### Test all hosts:
 ```bash
-ansible all -i /home/shaun/ansible/inventory/hosts -m ping
+ansible all -i /home/user/ansible/inventory/hosts -m ping
 ```
 
 ### Run full discovery:
 ```bash
-ansible-playbook -i /home/shaun/ansible/inventory/hosts playbooks/discover.yml
+ansible-playbook -i /home/user/ansible/inventory/hosts playbooks/discover.yml
 ```
 
 ### Check specific host:
 ```bash
-ansible amdaiserver -i /home/shaun/ansible/inventory/hosts -m setup
+ansible amdaiserver -i /home/user/ansible/inventory/hosts -m setup
 ```
 
 ### Deploy monitoring to all hosts:
 ```bash
-ansible-playbook -i /home/shaun/ansible/inventory/hosts playbooks/install_node_exporters.yml
+ansible-playbook -i /home/user/ansible/inventory/hosts playbooks/install_node_exporters.yml
 ```
 
 ## Next Steps

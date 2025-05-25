@@ -16,8 +16,8 @@
 1. Make sure you're in the "homelab" realm (check top-left dropdown)
 2. Left menu → Users → Add User
 3. Fill in:
-   - Username: `shaun`
-   - Email: `shaun@shaunjackson.space`
+   - Username: `user`
+   - Email: `user@userjackson.space`
    - Email verified: ON
    - Click Save
 4. Go to Credentials tab
@@ -39,7 +39,7 @@
 4. Login settings:
    - Valid redirect URIs: 
      - `http://192.168.10.108:3000/*`
-     - `https://grafana.shaunjackson.space/*`
+     - `https://grafana.userjackson.space/*`
    - Valid post logout redirect URIs: `+`
    - Web origins: `+`
    - Click Save
@@ -48,7 +48,7 @@
 
 ## Step 4: Configure Grafana for SSO
 
-SSH to homelab2 and run:
+SSH to test-server and run:
 
 ```bash
 # Create Grafana SSO config
@@ -78,7 +78,7 @@ docker restart grafana
 1. Go to Grafana: http://192.168.10.108:3000
 2. You should see "Sign in with Keycloak" button
 3. Click it
-4. Login with: shaun / The Old One01!
+4. Login with: user / The Old One01!
 5. You should be logged into Grafana!
 
 ## Step 6: Configure Other Services

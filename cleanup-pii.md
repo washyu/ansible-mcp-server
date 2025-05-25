@@ -3,16 +3,16 @@
 ## Current PII/Specific References to Remove
 
 ### Documentation Files
-- `homelab2-migration-guide.md` - Contains specific server names and IPs
+- `test-server-migration-guide.md` - Contains specific server names and IPs
 - `deploy-v1.1-features.md` - Has specific IP addresses
 - Configuration examples with real hostnames/IPs
 - User-specific paths and usernames
 
 ### Code References
-- Default usernames like 'shaun', 'ubuntu', etc.
+- Default usernames like 'user', 'ubuntu', etc.
 - Specific IP ranges (192.168.10.x)
-- Specific hostnames (homelab2, truenas.local, etc.)
-- Specific paths (/home/shaun/ansible)
+- Specific hostnames (test-server, truenas.local, etc.)
+- Specific paths (/home/user/ansible)
 
 ## Generic Replacements
 
@@ -22,13 +22,13 @@
 - `192.168.10.0/24` → `192.168.1.0/24` (generic network)
 
 ### Hostnames
-- `homelab2` → `ansible-controller-01` or `existing-controller`
+- `test-server` → `ansible-controller-01` or `existing-controller`
 - `truenas.local` → `nas-server.local`
 - `pihole.local` → `dns-server.local`
 - Gateway `192.168.10.1` → `192.168.1.1`
 
 ### Usernames
-- `shaun` → `ansible` or `admin`
+- `user` → `ansible` or `admin`
 - Specific user paths → generic `/home/ansible/` or `/opt/ansible/`
 
 ### Server Names

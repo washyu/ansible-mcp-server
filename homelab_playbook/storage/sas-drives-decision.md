@@ -2,7 +2,7 @@
 
 ## Current Situation
 - 3x 4TB SAS drives = 12TB raw
-- Nextcloud now running on homelab2
+- Nextcloud now running on test-server
 - TrueNAS still has the SAS drives
 
 ## Quick Decision: Keep or Toss?

@@ -4,15 +4,15 @@
 
 ### Small Homelab Setup
 ```
-Network: 192.168.1.0/24
-Gateway: 192.168.1.1
+Network: YOUR_NETWORK_SUBNET
+Gateway: YOUR_GATEWAY_IP
 
 Servers:
-- Proxmox Host: 192.168.1.100
-- MCP Server: 192.168.1.10  
-- NAS Server: 192.168.1.101
-- DNS Server: 192.168.1.102
-- VMs: 192.168.1.110-199
+- Proxmox Host: YOUR_PROXMOX_HOST
+- MCP Server: YOUR_GATEWAY_IP0  
+- NAS Server: YOUR_GATEWAY_IP01
+- DNS Server: YOUR_GATEWAY_IP02
+- VMs: YOUR_GATEWAY_IP10-199
 ```
 
 ### Medium Enterprise Setup
@@ -33,25 +33,25 @@ Infrastructure:
 ### Web Server Stack
 ```bash
 # Deploy web server
-deploy-service --serviceName="nginx" --vmName="web-server-01" --ip="192.168.1.110"
+deploy-service --serviceName="nginx" --vmName="web-server-01" --ip="YOUR_GATEWAY_IP10"
 
 # Deploy database
-deploy-service --serviceName="postgresql" --vmName="db-server-01" --ip="192.168.1.111"
+deploy-service --serviceName="postgresql" --vmName="db-server-01" --ip="YOUR_GATEWAY_IP11"
 
 # Deploy monitoring
-deploy-service --serviceName="prometheus" --vmName="monitoring-01" --ip="192.168.1.112"
+deploy-service --serviceName="prometheus" --vmName="monitoring-01" --ip="YOUR_GATEWAY_IP12"
 ```
 
 ### Development Environment
 ```bash
 # Git server
-deploy-service --serviceName="gitea" --vmName="git-server" --ip="192.168.1.120"
+deploy-service --serviceName="gitea" --vmName="git-server" --ip="YOUR_GATEWAY_IP20"
 
 # CI/CD
-deploy-service --serviceName="jenkins" --vmName="ci-server" --ip="192.168.1.121"
+deploy-service --serviceName="jenkins" --vmName="ci-server" --ip="YOUR_GATEWAY_IP21"
 
 # Container registry
-deploy-service --serviceName="docker-registry" --vmName="registry" --ip="192.168.1.122"
+deploy-service --serviceName="docker-registry" --vmName="registry" --ip="YOUR_GATEWAY_IP22"
 ```
 
 ## External Server Examples
@@ -60,7 +60,7 @@ deploy-service --serviceName="docker-registry" --vmName="registry" --ip="192.168
 ```bash
 # Router/Gateway
 add-external-server \
-  --hostname="192.168.1.1" \
+  --hostname="YOUR_GATEWAY_IP" \
   --type="gateway" \
   --connection='{"method":"ssh","username":"admin"}'
 
@@ -101,10 +101,10 @@ all:
     proxmox_vms:
       hosts:
         web-server-01:
-          ansible_host: 192.168.1.110
+          ansible_host: YOUR_GATEWAY_IP10
           purpose: web_frontend
         db-server-01:
-          ansible_host: 192.168.1.111
+          ansible_host: YOUR_GATEWAY_IP11
           purpose: database
     
     external_servers:
@@ -141,14 +141,14 @@ all:
     development:
       hosts:
         dev-server-01:
-          ansible_host: 192.168.1.150
+          ansible_host: YOUR_GATEWAY_IP50
     
     monitoring:
       hosts:
         prometheus-server:
-          ansible_host: 192.168.1.160
+          ansible_host: YOUR_GATEWAY_IP60
         grafana-server:
-          ansible_host: 192.168.1.161
+          ansible_host: YOUR_GATEWAY_IP61
 ```
 
 ## Environment Variables Templates
@@ -156,10 +156,10 @@ all:
 ### Development Environment
 ```bash
 # .env.development
-PROXMOX_HOST=192.168.1.100
+PROXMOX_HOST=YOUR_PROXMOX_HOST
 PROXMOX_USER=root@pam
 PROXMOX_NODE=pve-dev
-DEFAULT_GATEWAY=192.168.1.1
+DEFAULT_GATEWAY=YOUR_GATEWAY_IP
 DEFAULT_NETWORK_CIDR=24
 ```
 
@@ -188,12 +188,12 @@ manage-ssh-keys --action="generate" --keyType="rsa" --keySize=4096
 ```bash
 # Web servers
 manage-ssh-keys --action="distribute" \
-  --targets='["192.168.1.110", "192.168.1.111", "192.168.1.112"]' \
+  --targets='["YOUR_GATEWAY_IP10", "YOUR_GATEWAY_IP11", "YOUR_GATEWAY_IP12"]' \
   --username="ansible"
 
 # Infrastructure servers
 manage-ssh-keys --action="distribute" \
-  --targets='["192.168.1.100", "192.168.1.1"]' \
+  --targets='["YOUR_PROXMOX_HOST", "YOUR_GATEWAY_IP"]' \
   --username="root"
 ```
 
@@ -202,11 +202,11 @@ manage-ssh-keys --action="distribute" \
 ### Scenario 1: Single Controller Migration
 ```bash
 # Discover existing setup
-discover-ansible-controller --networkRange="192.168.1.0/24"
+discover-ansible-controller --networkRange="YOUR_NETWORK_SUBNET"
 
 # Import configuration
 import-ansible-config \
-  --controllerHost="192.168.1.50" \
+  --controllerHost="YOUR_ANSIBLE_CONTROLLER" \
   --username="ansible"
 
 # Migrate control

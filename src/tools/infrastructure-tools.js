@@ -50,7 +50,7 @@ const HomelabDeploySchema = z.object({
 // Helper functions
 async function makeProxmoxRequest(path, options) {
   const config = {
-    host: options.proxmoxHost || process.env.PROXMOX_HOST || '192.168.1.100',
+    host: options.proxmoxHost || process.env.PROXMOX_HOST || 'YOUR_PROXMOX_HOST',
     user: options.proxmoxUser || process.env.PROXMOX_USER || 'root@pam',
     password: options.proxmoxPassword || process.env.PROXMOX_PASSWORD
   };

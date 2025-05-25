@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createInterface } from 'readline';
 
-const REST_URL = process.env.MCP_REST_URL || 'http://192.168.10.100:3000';
+const REST_URL = process.env.MCP_REST_URL || 'http://YOUR_MCP_SERVER_IP:3000';
 let sessionId = null;
 
 const rl = createInterface({

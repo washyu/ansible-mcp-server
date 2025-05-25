@@ -15,7 +15,7 @@
 
 3. **Create terraform.tfvars**:
    ```bash
-   cd /home/shaun/ansible-mcp-server/terraform/mcp-server
+   cd /home/user/ansible-mcp-server/terraform/mcp-server
    cat > terraform.tfvars << EOF
    proxmox_api_token_id = "root@pam!ansible"
    proxmox_api_token_secret = "YOUR-TOKEN-SECRET-HERE"
@@ -24,7 +24,7 @@
 
 4. **Test the connection**:
    ```bash
-   cd /home/shaun/ansible-mcp-server/terraform/mcp-server
+   cd /home/user/ansible-mcp-server/terraform/mcp-server
    terraform init
    terraform plan
    ```

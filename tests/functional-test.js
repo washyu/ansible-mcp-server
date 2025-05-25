@@ -117,11 +117,11 @@ async function setup() {
   // Create test inventory
   const inventoryContent = `
 [webservers]
-web1 ansible_host=192.168.10.11
-web2 ansible_host=192.168.10.12
+web1 ansible_host=localhost
+web2 ansible_host=localhost
 
 [databases]
-db1 ansible_host=192.168.10.21
+db1 ansible_host=localhost
 
 [all:vars]
 ansible_user=ubuntu

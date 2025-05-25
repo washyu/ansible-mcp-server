@@ -3,7 +3,7 @@ Updated: May 23, 2025
 
 ## ✅ Working Hosts (3/4)
 
-### 1. homelab2 (192.168.10.108)
+### 1. test-server (192.168.10.108)
 - **OS**: Ubuntu 24.04
 - **Role**: Management Server
 - **Services**: Ansible MCP Server installed
@@ -33,12 +33,12 @@ Updated: May 23, 2025
 - **Issue**: SSH authentication failing
 - **Status**: Host reachable but no SSH access
 - **Action needed**: 
-  - Create shaun user with sudo access
+  - Create user user with sudo access
   - Or add SSH key for root/admin user
   - Password should be Tenchi01!
 
 ## Ansible MCP Server Status
-- **Installation**: ✅ Successfully deployed on homelab2
+- **Installation**: ✅ Successfully deployed on test-server
 - **Service**: ansible-mcp-server.service
 - **Available Tools**:
   - ansible-playbook
@@ -50,17 +50,17 @@ Updated: May 23, 2025
 
 ### Test all hosts:
 ```bash
-ansible all -i /home/shaun/ansible/inventory/hosts -m ping
+ansible all -i /home/user/ansible/inventory/hosts -m ping
 ```
 
 ### Run discovery on working hosts:
 ```bash
-ansible-playbook -i /home/shaun/ansible/inventory/hosts playbooks/discover.yml --limit 'homelab2,linuxrwifi,truenas'
+ansible-playbook -i /home/user/ansible/inventory/hosts playbooks/discover.yml --limit 'test-server,linuxrwifi,truenas'
 ```
 
 ### Check specific host details:
 ```bash
-ansible truenas -i /home/shaun/ansible/inventory/hosts -m setup
+ansible truenas -i /home/user/ansible/inventory/hosts -m setup
 ```
 
 ## Next Steps

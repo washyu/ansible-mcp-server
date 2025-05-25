@@ -1,4 +1,4 @@
-# GoDaddy DNS Changes for shaunjackson.space
+# GoDaddy DNS Changes for userjackson.space
 
 ## Records to Add (if zone file import fails)
 
@@ -6,7 +6,7 @@
 1. **MX Record**
    - Type: MX
    - Name: @
-   - Value: mail.shaunjackson.space
+   - Value: mail.userjackson.space
    - Priority: 10
    - TTL: 1 Hour
 
@@ -54,5 +54,5 @@ OR
 
 ## After Adding:
 - DNS propagation takes 5-30 minutes
-- Test with: `nslookup mail.shaunjackson.space`
+- Test with: `nslookup mail.userjackson.space`
 - Should resolve to your current IP via sideboard.asuscomm.com

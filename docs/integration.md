@@ -23,7 +23,7 @@ Or if running from the project directory:
     "ansible": {
       "command": "npm",
       "args": ["run", "start"],
-      "cwd": "/home/shaun/ansible-mcp-server"
+      "cwd": "/home/user/ansible-mcp-server"
     }
   }
 }
@@ -60,8 +60,8 @@ Claude will translate this to:
   "params": {
     "name": "ansible-playbook",
     "arguments": {
-      "playbook": "/home/shaun/playbooks/deploy.yml",
-      "inventory": "/home/shaun/inventory/hosts",
+      "playbook": "/home/user/playbooks/deploy.yml",
+      "inventory": "/home/user/inventory/hosts",
       "extraVars": {
         "app_version": "2.1.0",
         "deploy_env": "staging"
@@ -83,7 +83,7 @@ Claude will translate this to:
   "params": {
     "name": "ansible-inventory",
     "arguments": {
-      "inventory": "/home/shaun/inventory/hosts",
+      "inventory": "/home/user/inventory/hosts",
       "list": true
     }
   }

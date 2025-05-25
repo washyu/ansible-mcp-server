@@ -11,7 +11,7 @@
 ### 1. Create Cloudflare Account
 - Go to https://www.cloudflare.com
 - Sign up for free account
-- Add your domain: shaunjackson.space
+- Add your domain: userjackson.space
 
 ### 2. Update Nameservers at GoDaddy
 - Login to GoDaddy
@@ -35,7 +35,7 @@ CNAME   webmail     washyushomelab.ip-ddns.com     No (DNS only)
 CNAME   portainer   washyushomelab.ip-ddns.com     No (DNS only)
 CNAME   proxmox     washyushomelab.ip-ddns.com     No (DNS only)
 CNAME   truenas     washyushomelab.ip-ddns.com     No (DNS only)
-MX      @           mail.shaunjackson.space        10
+MX      @           mail.userjackson.space        10
 TXT     @           "v=spf1 mx a ~all"
 ```
 
@@ -45,7 +45,7 @@ TXT     @           "v=spf1 mx a ~all"
 - Permissions:
   - Zone → DNS → Edit
   - Zone → Zone → Read
-- Zone Resources: Include → Specific zone → shaunjackson.space
+- Zone Resources: Include → Specific zone → userjackson.space
 
 ### 5. Configure NPM with Cloudflare
 In NPM SSL settings, you can use:
@@ -65,15 +65,15 @@ export CF_Token="your-api-token"
 export CF_Zone_ID="your-zone-id"
 
 # Get certificate
-~/.acme.sh/acme.sh --issue -d shaunjackson.space -d "*.shaunjackson.space" --dns dns_cf
+~/.acme.sh/acme.sh --issue -d userjackson.space -d "*.userjackson.space" --dns dns_cf
 
 # Certificate files will be in:
-# ~/.acme.sh/shaunjackson.space/
+# ~/.acme.sh/userjackson.space/
 ```
 
 ## Benefits:
 - No port 80/443 needed for validation
-- Can get wildcard certificates (*.shaunjackson.space)
+- Can get wildcard certificates (*.userjackson.space)
 - Works behind CGNAT or blocked ports
 - Free SSL certificates
 - Automatic renewal

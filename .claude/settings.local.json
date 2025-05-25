@@ -29,7 +29,8 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git config:*)",
-      "Bash(rsync:*)"
+      "Bash(rsync:*)",
+      "Bash(./run-v1-tests.sh:*)"
     ],
     "deny": []
   }

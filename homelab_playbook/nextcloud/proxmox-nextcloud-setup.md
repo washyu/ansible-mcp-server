@@ -1,7 +1,7 @@
 # Moving Nextcloud to Proxmox
 
 ## Current Setup
-- Nextcloud running on homelab2 (not ideal)
+- Nextcloud running on test-server (not ideal)
 - Should be on Proxmox (192.168.10.200)
 - Proxmox credentials: root / Tenchi01!
 
@@ -21,7 +21,7 @@
 
 ## Steps to Move:
 
-1. **Stop Nextcloud on homelab2**
+1. **Stop Nextcloud on test-server**
 ```bash
 cd ~/
 docker-compose -f nextcloud-oauth-docker.yml down
@@ -52,4 +52,4 @@ curl -fsSL https://get.docker.com | sh
 Would you like me to:
 1. Create an Ansible playbook for this?
 2. Guide you through the Proxmox UI?
-3. Keep it on homelab2 for now?
+3. Keep it on test-server for now?

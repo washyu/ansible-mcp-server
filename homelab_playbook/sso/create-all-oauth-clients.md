@@ -8,7 +8,7 @@
 - Client authentication: ON
 - Valid redirect URIs:
   - `http://192.168.10.108:9000/*`
-  - `https://portainer.shaunjackson.space/*`
+  - `https://portainer.userjackson.space/*`
 
 ### 2. Proxmox Client
 - Client ID: `proxmox`
@@ -16,7 +16,7 @@
 - Client authentication: ON
 - Valid redirect URIs:
   - `https://192.168.10.20:8006/*`
-  - `https://proxmox.shaunjackson.space/*`
+  - `https://proxmox.userjackson.space/*`
 
 ### 3. NPM Client (if supported)
 - Client ID: `nginx-proxy-manager`
@@ -24,7 +24,7 @@
 - Client authentication: ON
 - Valid redirect URIs:
   - `http://192.168.10.108:81/*`
-  - `https://npm.shaunjackson.space/*`
+  - `https://npm.userjackson.space/*`
 
 ### 4. TrueNAS Client (if supported)
 - Client ID: `truenas`
@@ -32,7 +32,7 @@
 - Client authentication: ON
 - Valid redirect URIs:
   - `http://192.168.10.30/*`
-  - `https://truenas.shaunjackson.space/*`
+  - `https://truenas.userjackson.space/*`
 
 ## After Creating Each Client:
 1. Go to Credentials tab

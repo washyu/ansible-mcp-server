@@ -77,7 +77,7 @@ services:
   nextcloud:
     image: nextcloud:latest
     environment:
-      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.shaunjackson.space
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.userjackson.space
       - OIDC_CLIENT_ID=<your-ms-client-id>
       - OIDC_CLIENT_SECRET=<your-ms-secret>
       - OIDC_PROVIDER_URL=https://login.microsoftonline.com/consumers/v2.0

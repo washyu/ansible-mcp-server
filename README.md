@@ -1,266 +1,144 @@
 # Ansible MCP Server
 
-A Model Context Protocol (MCP) server that provides Ansible CLI integration, allowing AI models to execute Ansible commands with proper error handling and JSON responses.
+A Model Context Protocol (MCP) server that enables AI assistants to manage infrastructure using Ansible and Terraform.
 
 ## Features
 
-### Core Ansible Integration
-- Execute `ansible-playbook` commands with full parameter support
-- Manage inventory with `ansible-inventory`
-- Handle roles and collections via `ansible-galaxy`
-- Run arbitrary Ansible commands safely
-- Create and manage Ansible playbooks
-- Generate infrastructure diagrams from inventory
+- **58 Infrastructure Management Tools**
+  - Ansible playbook creation and execution
+  - Terraform infrastructure provisioning
+  - Hardware discovery and inventory
+  - Security scanning and auditing
+  - Service deployment from catalog
+  - Network device management
+  - Environment management (test/staging/production)
 
-### Terraform Integration
-- Create and manage VM templates for Proxmox
-- Execute terraform plan/apply/output commands
-- Full infrastructure-as-code support
+- **AI-Optimized Design**
+  - Flexible playbook creation accepting YAML strings
+  - Comprehensive error handling
+  - Context persistence between sessions
+  - Dynamic tool loading for services
 
-### Service Catalog (NEW!)
-- Browse 20+ self-hosted services across 9 categories
-- View detailed service information including:
-  - Resource requirements (CPU, memory, disk)
-  - Feature lists and alternatives
-  - Links to documentation and GitHub
-- Dynamic service deployment with custom configurations
-- Services include: Nextcloud, GitLab, Jenkins, Jellyfin, Pi-hole, and more
+- **Cross-Platform Support**
+  - Linux server deployment
+  - Windows client support via SSE proxy
+  - Remote server management
 
-### Windows Compatibility
-- Server-Sent Events (SSE) proxy for Windows Claude Desktop
-- Alternative to SSH transport for network communication
-- Full MCP functionality on Windows
+## Quick Start
 
-### Infrastructure Management
-- Deploy complete service stacks (VM + configuration)
-- Server maintenance tools (updates, cleanup, monitoring)
-- Network topology visualization
-- Change impact analysis
+### Prerequisites
 
-## Prerequisites
+- Node.js 16+
+- Ansible 2.9+
+- Terraform (optional)
 
-- Node.js 18+ 
-- Ansible (will be installed automatically if not present)
-- Linux system (for systemd integration)
-
-## Installation
-
-### Local Installation
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/ansible-mcp-server.git
 cd ansible-mcp-server
+
+# Install dependencies
 npm install
-sudo ./scripts/install.sh
-```
 
-### Deploy to Remote Server (homelab2)
+# Copy and configure environment
+cp .env.example .env
+# Edit .env with your settings
 
-```bash
-# Ensure you have SSH key authentication set up
-./scripts/deploy-to-homelab2.sh
-
-# Or with custom username
-REMOTE_USER=myuser ./scripts/deploy-to-homelab2.sh
-```
-
-## Usage
-
-### As a Systemd Service
-
-```bash
-# Start the service
-sudo systemctl start ansible-mcp-server
-
-# Enable at boot
-sudo systemctl enable ansible-mcp-server
-
-# Check status
-sudo systemctl status ansible-mcp-server
-
-# View logs
-sudo journalctl -u ansible-mcp-server -f
-```
-
-### Manual Execution
-
-```bash
-# Run directly
-ansible-mcp
-
-# Or from project directory
+# Run the server
 npm start
 ```
 
-## MCP Tools
+### For Claude Desktop
 
-### ansible-playbook
-Execute Ansible playbooks with various options:
+Add to your Claude Desktop configuration:
+
 ```json
 {
-  "playbook": "/path/to/playbook.yml",
-  "inventory": "/path/to/inventory",
-  "limit": "webservers",
-  "tags": "deploy,configure",
-  "extraVars": {
-    "version": "1.2.3",
-    "environment": "production"
-  },
-  "check": false,
-  "verbose": true
-}
-```
-
-### ansible-inventory
-Display or dump configured inventory:
-```json
-{
-  "inventory": "/path/to/inventory",
-  "list": true,
-  "host": "server1",
-  "graph": false
-}
-```
-
-### ansible-galaxy
-Manage Ansible roles and collections:
-```json
-{
-  "action": "install",
-  "name": "geerlingguy.docker",
-  "source": "https://galaxy.ansible.com",
-  "force": false
-}
-```
-
-### ansible-command
-Run arbitrary Ansible commands:
-```json
-{
-  "command": "ansible all -m ping",
-  "args": ["-i", "inventory.ini"]
-}
-```
-
-### browse-services
-Browse available services in the catalog:
-```json
-{
-  "category": "dev-tools",
-  "search": "git",
-  "showAlternatives": true
-}
-```
-
-### service-details
-Get detailed information about a specific service:
-```json
-{
-  "serviceName": "jenkins"
-}
-```
-
-### deploy-service
-Deploy a service from the catalog:
-```json
-{
-  "serviceName": "gitea",
-  "vmName": "git-server",
-  "ip": "192.168.1.120",
-  "customConfig": {
-    "GITEA_DOMAIN": "git.example.com"
+  "mcpServers": {
+    "ansible": {
+      "command": "node",
+      "args": ["/path/to/ansible-mcp-server/src/index.js"],
+      "env": {
+        "PROXMOX_HOST": "your-proxmox-host",
+        "PROXMOX_USER": "root@pam",
+        "PROXMOX_PASSWORD": "your-password"
+      }
+    }
   }
 }
 ```
 
-## Response Format
+### Windows Users
 
-All commands return JSON responses:
+For Windows Claude Desktop, use the SSE proxy:
 
-```json
-{
-  "success": true,
-  "output": "Command output here",
-  "error": "Any error output",
-  "exitCode": 0
-}
-```
+1. Deploy the MCP server to a Linux host
+2. Run the SSE server on the Linux host
+3. Configure Claude Desktop to use the Windows client
 
-## Security Considerations
+See [Windows Setup Guide](docs/windows-claude-desktop-setup.md) for details.
 
-- The service runs with limited privileges (`nobody:nogroup`)
-- Restricted to Ansible commands only
-- Temporary files are isolated
-- System and home directories are protected
+## Available Tools
 
-## Uninstallation
+### Ansible Tools
+- `create-playbook-flexible` - Create playbooks with YAML strings or objects
+- `ansible-playbook` - Run Ansible playbooks
+- `ansible-task` - Run ad-hoc Ansible tasks
+- `ansible-role` - Execute Ansible roles
+- `validate-playbook` - Validate playbook syntax
+- `create-role-structure` - Generate Ansible role directories
+
+### Infrastructure Tools
+- `hardware-scan` - Comprehensive hardware discovery
+- `storage-analysis` - Storage and SMART health analysis
+- `network-interfaces` - Network adapter discovery
+- `discover-proxmox` - Discover Proxmox VMs
+- `generate-inventory` - Create Ansible inventories
+
+### Security Tools
+- `security-quick-scan` - Quick security assessment
+- `security-scan-ports` - Port scanning
+- `security-check-passwords` - Password policy audit
+- `security-audit-accounts` - User account audit
+- `security-check-ssh` - SSH configuration audit
+
+### Service Management
+- `browse-services` - Browse service catalog
+- `deploy-service` - Deploy services from catalog
+- `list-environments` - List deployment environments
+- `deploy-to-environment` - Deploy with environment protection
+
+## Documentation
+
+- [Integration Guide](docs/integration.md)
+- [Hardware Inventory Guide](docs/hardware-inventory-guide.md)
+- [Claude Playbook Fix](docs/claude-playbook-fix.md)
+- [Modular Tools System](docs/modular-tools.md)
+
+## Testing
+
+Run the comprehensive test suite:
 
 ```bash
-sudo ./scripts/uninstall.sh
+./run-v1-tests.sh
 ```
 
-## Development
+## Contributing
 
-```bash
-# Install dev dependencies
-npm install
-
-# Run in development mode with auto-reload
-npm run dev
-
-# Run tests
-npm test
-```
-
-## Windows Users
-
-For Windows users connecting Claude Desktop to a remote MCP server, we provide an SSE (Server-Sent Events) proxy solution that works reliably over HTTP:
-
-### Quick Setup
-
-1. **On your Linux server**:
-   ```bash
-   sudo ./deploy-sse-server.sh
-   ```
-
-2. **On your Windows machine**:
-   ```powershell
-   # Run in PowerShell as Administrator
-   .\windows-setup.ps1
-   ```
-
-3. **Restart Claude Desktop**
-
-See [Windows SSE Setup Guide](docs/windows-sse-setup.md) for detailed instructions.
-
-### Alternative Options
-
-1. **Use WSL2**: Run the MCP server locally in WSL2
-2. **Use Docker Desktop**: Run the containerized version locally
-3. **VPN Access**: Connect to your homelab network via VPN
-
-## Troubleshooting
-
-1. **SSH connection fails during deployment**
-   - Ensure SSH key authentication is set up
-   - Check hostname resolution for 'homelab2'
-   - Verify the remote user has sudo privileges
-
-2. **Ansible commands fail**
-   - Ensure Ansible is installed (`ansible --version`)
-   - Check inventory file paths are correct
-   - Verify playbook syntax
-
-3. **Service won't start**
-   - Check logs: `sudo journalctl -u ansible-mcp-server -n 50`
-   - Verify Node.js is installed
-   - Ensure port is not in use
-
-4. **Windows Claude Desktop connection issues**
-   - Check firewall allows port 3001
-   - Verify API token matches between client and server
-   - Test SSE server health: `curl http://server-ip:3001/health`
-   - See [Windows SSE Setup Guide](docs/windows-sse-setup.md)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built for use with [Claude](https://claude.ai) and other AI assistants
+- Uses the [Model Context Protocol](https://modelcontextprotocol.io)
+- Powered by [Ansible](https://ansible.com) and [Terraform](https://terraform.io)
