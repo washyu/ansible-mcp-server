@@ -500,42 +500,44 @@ const infrastructureTools = [
     }
   },
 
-  {
-    name: 'homelab-deploy',
-    description: 'Full stack deployment: create VM with Terraform and configure with Ansible',
-    inputSchema: HomelabDeploySchema,
-    handler: async (args) => {
-      try {
-        const validatedArgs = HomelabDeploySchema.parse(args);
-        const results = [];
-        
-        // This is a placeholder - the actual implementation would:
-        // 1. Create Terraform configuration for the VM
-        // 2. Run terraform apply
-        // 3. Wait for VM to be ready
-        // 4. Run appropriate Ansible playbook
-        
-        results.push(`Would deploy ${validatedArgs.service} as ${validatedArgs.vmName}`);
-        results.push(`VM ID: ${validatedArgs.vmid}`);
-        if (validatedArgs.ipAddress) {
-          results.push(`Static IP: ${validatedArgs.ipAddress}`);
-        }
-        results.push(`Auto-deploy: ${validatedArgs.deploy}`);
-        
-        return {
-          success: true,
-          output: results.join('\n'),
-          error: ''
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error.message,
-          output: ''
-        };
-      }
-    }
-  }
+  // COMMENTED OUT: homelab-deploy - This is a stub implementation
+  // TODO: Implement actual VM creation with Terraform and Ansible configuration
+  // {
+  //   name: 'homelab-deploy',
+  //   description: 'Full stack deployment: create VM with Terraform and configure with Ansible',
+  //   inputSchema: HomelabDeploySchema,
+  //   handler: async (args) => {
+  //     try {
+  //       const validatedArgs = HomelabDeploySchema.parse(args);
+  //       const results = [];
+  //       
+  //       // This is a placeholder - the actual implementation would:
+  //       // 1. Create Terraform configuration for the VM
+  //       // 2. Run terraform apply
+  //       // 3. Wait for VM to be ready
+  //       // 4. Run appropriate Ansible playbook
+  //       
+  //       results.push(`Would deploy ${validatedArgs.service} as ${validatedArgs.vmName}`);
+  //       results.push(`VM ID: ${validatedArgs.vmid}`);
+  //       if (validatedArgs.ipAddress) {
+  //         results.push(`Static IP: ${validatedArgs.ipAddress}`);
+  //       }
+  //       results.push(`Auto-deploy: ${validatedArgs.deploy}`);
+  //       
+  //       return {
+  //         success: true,
+  //         output: results.join('\n'),
+  //         error: ''
+  //       };
+  //     } catch (error) {
+  //       return {
+  //         success: false,
+  //         error: error.message,
+  //         output: ''
+  //       };
+  //     }
+  //   }
+  // }
 ];
 
 // Export tools with proper schema conversion

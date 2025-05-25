@@ -115,7 +115,12 @@ const serviceTools = [
     inputSchema: DeployServiceSchema,
     handler: async (args) => {
       const validatedArgs = DeployServiceSchema.parse(args);
-      const service = serviceCatalog.find(s => 
+      // Convert serviceCatalog object to array and find service
+      const services = Object.entries(serviceCatalog).map(([key, service]) => ({
+        ...service,
+        id: key
+      }));
+      const service = services.find(s => 
         s.name.toLowerCase() === validatedArgs.serviceName.toLowerCase()
       );
       
