@@ -11,3 +11,4 @@ playbooks/
 state-captures/
 terraform/
 coverage/
+.claude/
