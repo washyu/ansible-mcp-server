@@ -256,7 +256,10 @@ const terraformTools = [
     inputSchema: CreateVMTemplateSchema,
     handler: async (args) => {
       const validatedArgs = CreateVMTemplateSchema.parse(args);
-      const outputDir = path.join(process.cwd(), validatedArgs.outputDir, validatedArgs.name);
+      const baseDir = path.isAbsolute(validatedArgs.outputDir) 
+        ? validatedArgs.outputDir 
+        : path.join(process.cwd(), validatedArgs.outputDir);
+      const outputDir = path.join(baseDir, validatedArgs.name);
       
       // Create directory
       await fs.mkdir(outputDir, { recursive: true });

@@ -1,0 +1,59 @@
+{
+  "total": 2,
+  "vms": {
+    "all": [
+      {
+        "vmid": 110,
+        "name": "mcp-server",
+        "status": "running",
+        "cores": 2,
+        "memory": "4096",
+        "disk": "scsi0",
+        "ip": "192.168.10.100",
+        "node": "proxmox",
+        "purpose": "general",
+        "tags": ""
+      },
+      {
+        "vmid": 100,
+        "name": "dev-vm",
+        "status": "running",
+        "cores": 4,
+        "memory": "16384",
+        "disk": "unknown",
+        "ostype": "l26",
+        "ip": null,
+        "node": "proxmox",
+        "purpose": "general",
+        "tags": ""
+      }
+    ]
+  },
+  "raw": [
+    {
+      "vmid": 110,
+      "name": "mcp-server",
+      "status": "running",
+      "cores": 2,
+      "memory": "4096",
+      "disk": "scsi0",
+      "ip": "192.168.10.100",
+      "node": "proxmox",
+      "purpose": "general",
+      "tags": ""
+    },
+    {
+      "vmid": 100,
+      "name": "dev-vm",
+      "status": "running",
+      "cores": 4,
+      "memory": "16384",
+      "disk": "unknown",
+      "ostype": "l26",
+      "ip": null,
+      "node": "proxmox",
+      "purpose": "general",
+      "tags": ""
+    }
+  ]
+}

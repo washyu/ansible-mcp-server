@@ -26,7 +26,11 @@ const DeployServiceSchema = z.object({
 
 // Helper functions
 function filterServices(category = 'all', search = '') {
-  let services = serviceCatalog;
+  // Convert serviceCatalog object to array
+  let services = Object.entries(serviceCatalog).map(([key, service]) => ({
+    ...service,
+    id: key
+  }));
   
   if (category !== 'all') {
     services = services.filter(s => s.category === category);
@@ -59,7 +63,7 @@ const serviceTools = [
         category: service.category,
         description: service.description,
         alternatives: service.alternatives,
-        link: service.links.github || service.links.website
+        link: service.github || service.website
       }));
       
       return {
@@ -80,7 +84,12 @@ const serviceTools = [
     inputSchema: ServiceDetailsSchema,
     handler: async (args) => {
       const validatedArgs = ServiceDetailsSchema.parse(args);
-      const service = serviceCatalog.find(s => 
+      // Convert serviceCatalog object to array and find service
+      const services = Object.entries(serviceCatalog).map(([key, service]) => ({
+        ...service,
+        id: key
+      }));
+      const service = services.find(s => 
         s.name.toLowerCase() === validatedArgs.serviceName.toLowerCase()
       );
       

@@ -1,0 +1,27 @@
+{
+  "passing": [
+    "ansible-playbook",
+    "ansible-role",
+    "ansible-task",
+    "browse-services"
+  ],
+  "failing": [
+    "add-external-server",
+    "capture-state",
+    "create-acceptance-test",
+    "create-playbook-flexible",
+    "create-playbook",
+    "create-role-structure",
+    "create-vm-template",
+    "deploy-service",
+    "deploy-to-environment",
+    "discover-ansible-controller",
+    "discover-network-devices",
+    "discover-proxmox",
+    "generate-diagram",
+    "generate-inventory-playbook",
+    "generate-inventory",
+    "get-config"
+  ],
+  "total": 20
+}

@@ -5,6 +5,3 @@
 - name: configure
   debug:
     msg: 'TODO: Implement configure'
-- name: secure
-  debug:
-    msg: 'TODO: Implement secure'

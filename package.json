@@ -11,7 +11,10 @@
     "dev": "node --watch src/index.js",
     "dev:rest": "node --watch src/rest-wrapper.js",
     "dev:sse": "node --watch src/sse-server.js",
-    "test": "node --test tests/",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:old": "node --test tests/",
     "test:sse": "node test-sse-server.js"
   },
   "dependencies": {
@@ -26,6 +29,8 @@
     "zod-to-json-schema": "^3.22.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.0.0",
+    "jest": "^29.7.0"
   }
 }

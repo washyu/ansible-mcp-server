@@ -10,3 +10,4 @@ node_modules/
 playbooks/
 state-captures/
 terraform/
+coverage/

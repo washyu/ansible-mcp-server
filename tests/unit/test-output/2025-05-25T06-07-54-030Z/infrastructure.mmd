@@ -1,0 +1,13 @@
+graph TB
+    subgraph "Proxmox Cluster"
+        subgraph "general"
+            100["dev-vm ✓<br/>            IP: DHCP<br/>            4 cores, 16384MB"]
+            110["mcp-server ✓<br/>            IP: 192.168.10.100<br/>            2 cores, 4096MB"]
+        end
+    end
+
+    Internet[("Internet")]
+    Router["Router/Gateway"]
+    Internet --> Router
+    Router --> 100
+    Router --> 110

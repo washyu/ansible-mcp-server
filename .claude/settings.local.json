@@ -31,7 +31,21 @@
       "Bash(git config:*)",
       "Bash(rsync:*)",
       "Bash(./run-v1-tests.sh:*)",
-      "Bash(./cleanup-root-v1.sh:*)"
+      "Bash(./cleanup-root-v1.sh:*)",
+      "Bash(git tag:*)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/unit/ansible-tools.test.js tests/unit/command-utils.test.js --no-coverage)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/unit/command-utils.test.js --no-coverage)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/generated/hardware-scan.test.js --no-coverage)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest --listTests)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/generated/create-playbook-flexible.test.js --no-coverage 2 >& 1)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/generated/create-playbook-flexible.test.js --no-coverage)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/generated/add-external-server.test.js --no-coverage 2 >& 1)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/generated/capture-state.test.js --no-coverage 2 >& 1)",
+      "Bash(NODE_OPTIONS='--experimental-vm-modules' npx jest tests/generated/create-playbook.test.js --no-coverage 2 >& 1)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

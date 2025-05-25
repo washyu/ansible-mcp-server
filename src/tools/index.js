@@ -14,6 +14,7 @@ import { serverManagementTools } from '../server-management-tools.js';
 import { setupTools } from '../setup-tools.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { promises as fs } from 'fs';
+import fsSync from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,9 +28,23 @@ class ToolRegistry {
     this.serviceTools = new Map(); // Tools specific to services
     this.contextStore = new Map(); // Persistent context storage
     this.contextFile = path.join(__dirname, '../../.mcp-context.json');
+    this.contextLoaded = false;
     
     // Load persistent context
-    this.loadContext();
+    this.loadContextSync();
+  }
+
+  loadContextSync() {
+    try {
+      const data = fsSync.readFileSync(this.contextFile, 'utf8');
+      const context = JSON.parse(data);
+      this.contextStore = new Map(Object.entries(context));
+      this.contextLoaded = true;
+    } catch (error) {
+      // Context file doesn't exist yet, that's okay
+      this.contextStore = new Map();
+      this.contextLoaded = true;
+    }
   }
 
   async loadContext() {
@@ -37,9 +52,11 @@ class ToolRegistry {
       const data = await fs.readFile(this.contextFile, 'utf8');
       const context = JSON.parse(data);
       this.contextStore = new Map(Object.entries(context));
+      this.contextLoaded = true;
     } catch (error) {
       // Context file doesn't exist yet, that's okay
       this.contextStore = new Map();
+      this.contextLoaded = true;
     }
   }
 

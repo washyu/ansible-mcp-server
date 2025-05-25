@@ -302,7 +302,9 @@ const infrastructureTools = [
         const yamlContent = JSON.stringify(inventory, null, 2);
         
         // Ensure output directory exists
-        const outputPath = path.join(process.cwd(), validatedArgs.outputFile);
+        const outputPath = path.isAbsolute(validatedArgs.outputFile)
+          ? validatedArgs.outputFile
+          : path.join(process.cwd(), validatedArgs.outputFile);
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
         
         // Write inventory file
@@ -415,7 +417,10 @@ const infrastructureTools = [
       try {
         const validatedArgs = CaptureStateSchema.parse(args);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const captureDir = path.join(process.cwd(), validatedArgs.outputDir, timestamp);
+        const baseDir = path.isAbsolute(validatedArgs.outputDir)
+          ? validatedArgs.outputDir
+          : path.join(process.cwd(), validatedArgs.outputDir);
+        const captureDir = path.join(baseDir, timestamp);
         
         await fs.mkdir(captureDir, { recursive: true });
         

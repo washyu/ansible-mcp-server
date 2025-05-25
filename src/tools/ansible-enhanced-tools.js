@@ -71,7 +71,8 @@ const ansibleEnhancedTools = [
     inputSchema: CreatePlaybookFlexibleSchema,
     handler: async (args) => {
       try {
-        const { name, content, directory } = args;
+        const validatedArgs = CreatePlaybookFlexibleSchema.parse(args);
+        const { name, content, directory } = validatedArgs;
         
         // Ensure filename has .yml extension
         const filename = name.endsWith('.yml') || name.endsWith('.yaml') 
@@ -105,7 +106,7 @@ const ansibleEnhancedTools = [
         }
         
         // Ensure directory exists
-        const fullPath = path.join(process.cwd(), directory);
+        const fullPath = path.isAbsolute(directory) ? directory : path.join(process.cwd(), directory);
         await ensureDirectory(fullPath);
         
         // Write playbook
@@ -133,7 +134,8 @@ const ansibleEnhancedTools = [
     inputSchema: ValidatePlaybookSchema,
     handler: async (args) => {
       try {
-        const { playbook, syntaxCheck } = args;
+        const validatedArgs = ValidatePlaybookSchema.parse(args);
+        const { playbook, syntaxCheck } = validatedArgs;
         
         // Check if file exists
         try {
@@ -204,7 +206,8 @@ const ansibleEnhancedTools = [
     inputSchema: GenerateInventoryPlaybookSchema,
     handler: async (args) => {
       try {
-        const { name, targetHosts, gatherFacts, outputFile } = args;
+        const validatedArgs = GenerateInventoryPlaybookSchema.parse(args);
+        const { name, targetHosts, gatherFacts, outputFile } = validatedArgs;
         
         const tasks = [];
         
@@ -284,7 +287,8 @@ const ansibleEnhancedTools = [
     inputSchema: CreateRoleStructureSchema,
     handler: async (args) => {
       try {
-        const { roleName, includeTasks, includeHandlers, includeTemplates, includeDefaults } = args;
+        const validatedArgs = CreateRoleStructureSchema.parse(args);
+        const { roleName, includeTasks, includeHandlers, includeTemplates, includeDefaults } = validatedArgs;
         
         const roleBase = path.join(process.cwd(), 'roles', roleName);
         
