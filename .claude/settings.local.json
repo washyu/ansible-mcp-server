@@ -30,7 +30,8 @@
       "Bash(git commit:*)",
       "Bash(git config:*)",
       "Bash(rsync:*)",
-      "Bash(./run-v1-tests.sh:*)"
+      "Bash(./run-v1-tests.sh:*)",
+      "Bash(./cleanup-root-v1.sh:*)"
     ],
     "deny": []
   }
