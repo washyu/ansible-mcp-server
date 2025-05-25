@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { ansibleToolDefinitions, ansibleToolHandlers } from './ansible-tools.js';
+import { ansibleEnhancedToolDefinitions, ansibleEnhancedToolHandlers } from './ansible-enhanced-tools.js';
 import { terraformToolDefinitions, terraformToolHandlers } from './terraform-tools.js';
 import { infrastructureToolDefinitions, infrastructureToolHandlers } from './infrastructure-tools.js';
 import { serviceToolDefinitions, serviceToolHandlers } from './service-tools.js';
@@ -146,6 +147,7 @@ const toolRegistry = new ToolRegistry();
 
 // Register core tools
 toolRegistry.registerTools(ansibleToolDefinitions, ansibleToolHandlers);
+toolRegistry.registerTools(ansibleEnhancedToolDefinitions, ansibleEnhancedToolHandlers);
 toolRegistry.registerTools(terraformToolDefinitions, terraformToolHandlers);
 toolRegistry.registerTools(infrastructureToolDefinitions, infrastructureToolHandlers);
 toolRegistry.registerTools(serviceToolDefinitions, serviceToolHandlers);
