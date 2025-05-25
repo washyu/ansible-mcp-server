@@ -33,8 +33,8 @@ git pull origin development
 git checkout -b feature/your-feature-name
 
 # Make changes and test
-npm test
-node run-tool-tests.js  # Run tool-specific tests
+npm test              # Run all tests
+npm run test:tools    # Run tool-specific tests
 
 # Commit and push to feature branch
 git add .
@@ -56,7 +56,6 @@ git push origin development
 ```bash
 # Ensure all tests pass
 npm test
-node run-tool-tests.js
 
 # Merge to main (pre-push hook will run tests)
 git checkout main
@@ -82,26 +81,37 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest tests/unit/ansible-tools.test.
 # Run old test suite (for comparison)
 npm run test:old
 
-# Run automated tool tests
-node run-tool-tests.js
+# Run specific test categories
+npm run test:unit          # Unit tests only
+npm run test:integration   # Integration tests only
+npm run test:tools         # Tool-specific tests
 
-# Run tool tests with verbose output
-node run-tool-tests.js --verbose
-```
+# Run tests by pattern
+npm run test:ansible       # Tests with 'ansible' in the name
+npm run test:service       # Tests with 'service' in the name
 
-## Automated Tool Testing
-
-We have a comprehensive automated test script (`run-tool-tests.js`) that tests each tool with various scenarios:
-
-### Running Tool Tests
-
-```bash
-# Run all tool tests
-node run-tool-tests.js
+# Run single test file
+npm test tests/unit/ansible-tools.test.js
+# Or with pattern
+npm test -- --testNamePattern="should execute basic playbook"
 
 # Run with verbose output
-node run-tool-tests.js --verbose
+npm run test:verbose
+
+# Run tests for CI environment
+npm run test:ci
 ```
+
+## Test Categories
+
+### Unit Tests (`npm run test:unit`)
+Tests individual functions and modules in isolation.
+
+### Integration Tests (`npm run test:integration`)
+Tests how components work together, including MCP server integration.
+
+### Tool Tests (`npm run test:tools`)
+Comprehensive tests for each MCP tool with various scenarios.
 
 ### Tool Test Coverage
 

@@ -26,14 +26,20 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run Jest tests
+    - name: Run all tests
       run: npm test
-      env:
-        NODE_OPTIONS: '--experimental-vm-modules'
+    
+    - name: Run unit tests only
+      run: npm run test:unit
+      continue-on-error: true
+    
+    - name: Run integration tests
+      run: npm run test:integration
+      continue-on-error: true
     
     - name: Run tool tests
-      run: node run-tool-tests.js
-      continue-on-error: true  # Don't fail build on tool test failures (for now)
+      run: npm run test:tools
+      continue-on-error: true
     
     - name: Upload coverage reports
       uses: actions/upload-artifact@v3
