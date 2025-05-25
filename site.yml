@@ -1,0 +1,28 @@
+---
+# Master playbook for complete homelab deployment
+# This playbook can recreate the entire homelab setup
+
+- name: Deploy Complete Homelab Infrastructure
+  hosts: all
+  gather_facts: yes
+  
+  tasks:
+    - name: Display deployment plan
+      debug:
+        msg: |
+          Homelab Deployment Plan:
+          1. Nginx Proxy Manager (homelab2)
+          2. Keycloak SSO (homelab2) - or Microsoft OAuth
+          3. Grafana with OAuth (homelab2)
+          4. Nextcloud with OnlyOffice (Proxmox LXC)
+          5. Poste.io Mail Server (homelab2)
+          6. Heimdall Dashboard (homelab2)
+          7. Pi-hole DNS (linuxrwifi)
+          8. ClouDNS DDNS Updater (homelab2)
+
+- import_playbook: deploy-nginx-proxy-manager.yml
+- import_playbook: deploy-nextcloud-proxmox-v2.yml
+- import_playbook: deploy-grafana.yml
+- import_playbook: deploy-mail-server.yml
+- import_playbook: deploy-heimdall.yml
+- import_playbook: configure-oauth.yml

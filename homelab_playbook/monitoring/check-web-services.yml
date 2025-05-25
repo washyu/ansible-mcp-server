@@ -1,0 +1,58 @@
+---
+- name: Check current web services and domain setup
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Check for web servers
+      shell: |
+        echo "=== Checking for Web Servers ==="
+        systemctl status nginx 2>/dev/null | grep -E "(Active|Main PID)" || echo "nginx: not found"
+        systemctl status apache2 2>/dev/null | grep -E "(Active|Main PID)" || echo "apache2: not found"
+        systemctl status httpd 2>/dev/null | grep -E "(Active|Main PID)" || echo "httpd: not found"
+        docker ps 2>/dev/null | grep -E "(nginx|apache|traefik|caddy)" || echo "No web containers"
+      register: web_servers
+      changed_when: false
+
+    - name: Check listening ports
+      shell: |
+        echo "=== Web Ports ==="
+        ss -tlnp 2>/dev/null | grep -E ":(80|443|8080|8443)" || netstat -tlnp 2>/dev/null | grep -E ":(80|443|8080|8443)"
+      register: web_ports
+      changed_when: false
+      become: yes
+
+    - name: Check for existing websites
+      shell: |
+        echo "=== Website Configs ==="
+        ls -la /var/www/ 2>/dev/null || echo "/var/www not found"
+        ls -la /etc/nginx/sites-enabled/ 2>/dev/null || echo "No nginx sites"
+        ls -la /etc/apache2/sites-enabled/ 2>/dev/null || echo "No apache sites"
+      register: website_configs
+      changed_when: false
+
+    - name: Display results
+      debug:
+        msg: |
+          === {{ inventory_hostname }} ===
+          {{ web_servers.stdout }}
+          {{ web_ports.stdout }}
+          {{ website_configs.stdout }}
+
+- name: Check DNS records for shaunjackson.space
+  hosts: homelab2
+  tasks:
+    - name: Lookup domain DNS records
+      shell: |
+        echo "=== DNS Records for shaunjackson.space ==="
+        dig shaunjackson.space A +short || nslookup shaunjackson.space
+        echo ""
+        dig www.shaunjackson.space A +short || nslookup www.shaunjackson.space
+        echo ""
+        echo "=== Current Public IP ==="
+        curl -s ifconfig.me || curl -s icanhazip.com
+      register: dns_info
+      changed_when: false
+
+    - name: Display DNS information
+      debug:
+        msg: "{{ dns_info.stdout_lines }}"

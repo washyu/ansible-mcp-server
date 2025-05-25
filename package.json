@@ -1,0 +1,30 @@
+{
+  "name": "ansible-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Ansible CLI integration",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:rest": "node src/rest-wrapper.js",
+    "start:sse": "node src/sse-server.js",
+    "dev": "node --watch src/index.js",
+    "dev:rest": "node --watch src/rest-wrapper.js",
+    "dev:sse": "node --watch src/sse-server.js",
+    "test": "node --test tests/",
+    "test:sse": "node test-sse-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "dotenv": "^16.5.0",
+    "eventsource": "^2.0.2",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0",
+    "yaml": "^2.8.0",
+    "zod": "^3.22.0",
+    "zod-to-json-schema": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

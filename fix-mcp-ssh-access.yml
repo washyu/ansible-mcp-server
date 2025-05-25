@@ -1,0 +1,38 @@
+---
+- name: Fix SSH access to MCP server
+  hosts: proxmox
+  become: yes
+  vars:
+    vm_id: 110
+    windows_ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFPhZtyLQCoEEbMFcd4VGv1MBXzEBxNv1igqbgTmhQ/z washy@Shauns-ProArt"
+    
+  tasks:
+    - name: Execute commands in VM via qm guest exec
+      shell: |
+        # First, ensure cloud-init has finished
+        qm guest exec {{ vm_id }} -- /bin/bash -c "cloud-init status --wait"
+        
+        # Add SSH key for ubuntu user
+        qm guest exec {{ vm_id }} -- /bin/bash -c "mkdir -p /home/ubuntu/.ssh && echo '{{ windows_ssh_key }}' >> /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh && chmod 700 /home/ubuntu/.ssh && chmod 600 /home/ubuntu/.ssh/authorized_keys"
+        
+        # Add SSH key for mcp user
+        qm guest exec {{ vm_id }} -- /bin/bash -c "mkdir -p /home/mcp/.ssh && echo '{{ windows_ssh_key }}' >> /home/mcp/.ssh/authorized_keys && chown -R mcp:mcp /home/mcp/.ssh && chmod 700 /home/mcp/.ssh && chmod 600 /home/mcp/.ssh/authorized_keys"
+        
+        # Also add for root (just in case)
+        qm guest exec {{ vm_id }} -- /bin/bash -c "mkdir -p /root/.ssh && echo '{{ windows_ssh_key }}' >> /root/.ssh/authorized_keys && chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys"
+      register: result
+      ignore_errors: yes
+      
+    - name: Show result
+      debug:
+        var: result
+        
+    - name: Alternative method - using Proxmox VNC
+      debug:
+        msg:
+          - "If the above didn't work, you can access the VM console:"
+          - "1. Open Proxmox web UI: https://{{ ansible_host }}:8006"
+          - "2. Select VM 110 (mcp-server)"
+          - "3. Click 'Console' to access the VM"
+          - "4. Login as 'ubuntu' (check cloud-init for default password)"
+          - "5. Run: sudo -u mcp sh -c 'mkdir -p ~/.ssh && echo \"{{ windows_ssh_key }}\" >> ~/.ssh/authorized_keys'"

@@ -1,0 +1,40 @@
+; Domain: shaunjackson.space
+; Updated for ClouDNS DDNS - washyushomelab.ip-ddns.com
+
+$ORIGIN shaunjackson.space.
+
+; SOA Record
+@    3600     IN     SOA    ns51.domaincontrol.com.    dns.jomax.net. (
+                    2025052303
+                    28800
+                    7200
+                    604800
+                    3600
+                    ) 
+
+; NS Record
+@    3600     IN     NS    ns51.domaincontrol.com.
+@    3600     IN     NS    ns52.domaincontrol.com.
+
+; MX Record - For email
+@    3600     IN     MX     10    mail.shaunjackson.space.
+
+; TXT Record - SPF for email
+@    3600     IN     TXT    "v=spf1 mx a ~all"
+
+; CNAME Records - Existing (keep these)
+pay    3600     IN     CNAME    paylinks.commerce.godaddy.com.
+_domainconnect    3600     IN     CNAME    _domainconnect.gd.domaincontrol.com.
+
+; CNAME Records - Point to your ClouDNS domain
+www        3600     IN     CNAME    washyushomelab.ip-ddns.com.
+mail       3600     IN     CNAME    washyushomelab.ip-ddns.com.
+heimdall   3600     IN     CNAME    washyushomelab.ip-ddns.com.
+grafana    3600     IN     CNAME    washyushomelab.ip-ddns.com.
+portainer  3600     IN     CNAME    washyushomelab.ip-ddns.com.
+proxmox    3600     IN     CNAME    washyushomelab.ip-ddns.com.
+truenas    3600     IN     CNAME    washyushomelab.ip-ddns.com.
+pihole     3600     IN     CNAME    washyushomelab.ip-ddns.com.
+auth       3600     IN     CNAME    washyushomelab.ip-ddns.com.
+npm        3600     IN     CNAME    washyushomelab.ip-ddns.com.
+webmail    3600     IN     CNAME    washyushomelab.ip-ddns.com.

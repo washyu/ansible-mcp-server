@@ -1,0 +1,118 @@
+# DuckDNS Docker Compose Configuration
+# This service automatically updates your DuckDNS subdomain with your current public IP address
+
+# SETUP INSTRUCTIONS:
+#
+# 1. SIGN UP FOR DUCKDNS:
+#    - Visit https://www.duckdns.org
+#    - Sign in with your preferred account (Google, GitHub, Twitter, Persona, or Reddit)
+#    - You'll be automatically given a token after signing in
+#
+# 2. GET YOUR TOKEN:
+#    - After signing in, your token will be displayed at the top of the page
+#    - It's a long string like: "a7c4d0ad-114e-40ef-ba1d-d217904a50f2"
+#    - Keep this token secure - it's your authentication key
+#
+# 3. CHOOSE A SUBDOMAIN:
+#    - On the DuckDNS dashboard, enter your desired subdomain in the "sub domain" field
+#    - Click "add domain" to claim it
+#    - Your full domain will be: yoursubdomain.duckdns.org
+#
+# 4. CONFIGURE THIS FILE:
+#    - Replace YOUR_SUBDOMAIN with your chosen subdomain (without .duckdns.org)
+#    - Replace YOUR_TOKEN with your DuckDNS token
+#    - Optional: Adjust the LOG_FILE path if needed
+#
+# 5. UPDATE GODADDY DNS:
+#    - Log into your GoDaddy account
+#    - Go to DNS Management for your domain
+#    - Create or update a CNAME record:
+#      * Type: CNAME
+#      * Name: @ (for root domain) or subdomain (e.g., "home")
+#      * Value: yoursubdomain.duckdns.org
+#      * TTL: 600 seconds (10 minutes) or 3600 (1 hour)
+#    - Example: If you want home.yourdomain.com to point to your DuckDNS:
+#      * Name: home
+#      * Value: yoursubdomain.duckdns.org
+#
+# TO RUN:
+# docker-compose -f duckdns-docker-compose.yml up -d
+#
+# TO CHECK LOGS:
+# docker-compose -f duckdns-docker-compose.yml logs -f
+
+version: '3.8'
+
+services:
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    environment:
+      # Your DuckDNS subdomain(s) - can be comma-separated for multiple
+      # Example: "mysubdomain" or "subdomain1,subdomain2"
+      - SUBDOMAINS=YOUR_SUBDOMAIN
+      
+      # Your DuckDNS token from https://www.duckdns.org
+      - TOKEN=YOUR_TOKEN
+      
+      # Optional: Update method (default is auto-detect)
+      # - UPDATE_IP=ipv4  # Force IPv4 only
+      # - UPDATE_IP=ipv6  # Force IPv6 only
+      # - UPDATE_IP=both  # Update both IPv4 and IPv6
+      
+      # Container timezone
+      - TZ=America/New_York
+      
+      # Optional: Log file location inside container
+      - LOG_FILE=/config/duckdns.log
+      
+      # User/Group IDs for file permissions (optional)
+      - PUID=1000
+      - PGID=1000
+    
+    volumes:
+      # Persist logs and configuration
+      - ./duckdns-config:/config
+    
+    restart: unless-stopped
+    
+    # Optional: Add health check
+    healthcheck:
+      test: ["CMD", "grep", "-q", "OK", "/config/duckdns.log"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# Optional: Create external network if you want to connect other services
+# networks:
+#   default:
+#     external:
+#       name: homelab-network
+
+# ADDITIONAL NOTES:
+#
+# 1. The service updates every 5 minutes by default
+# 2. Check the logs in ./duckdns-config/duckdns.log for update status
+# 3. Common log messages:
+#    - "OK" means the update was successful
+#    - "KO" means the update failed (check your token and subdomain)
+#
+# 4. SECURITY TIPS:
+#    - Never commit this file with your actual token to version control
+#    - Consider using Docker secrets or environment variables from a .env file
+#    - Example .env file:
+#      DUCKDNS_TOKEN=your-actual-token
+#      DUCKDNS_SUBDOMAIN=your-subdomain
+#    - Then reference in docker-compose: ${DUCKDNS_TOKEN}
+#
+# 5. TROUBLESHOOTING:
+#    - If updates fail, verify your token at https://www.duckdns.org
+#    - Check if the subdomain is still registered to your account
+#    - Ensure homelab2 has internet connectivity
+#    - Check firewall rules (only outbound HTTPS is needed)
+#
+# 6. GODADDY DNS PROPAGATION:
+#    - DNS changes can take up to 48 hours to propagate globally
+#    - You can check propagation at: https://www.whatsmydns.net
+#    - Most updates are visible within 10-30 minutes

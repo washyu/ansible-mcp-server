@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter - Add your servers here
+  - job_name: 'node'
+    static_configs:
+      - targets: 
+        - '192.168.10.108:9100'  # homelab2
+        - '192.168.10.1:9100'    # linuxrwifi
+        - '192.168.10.20:9100'   # proxmox
+        - '192.168.10.30:9100'   # truenas
+
+  # Docker containers
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['192.168.10.108:9323']
+
+  # Blackbox exporter for HTTP checks
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://192.168.10.108:8080  # Heimdall
+        - http://192.168.10.108:3000  # Grafana
+        - http://192.168.10.108:9000  # Portainer
+        - http://192.168.10.1         # Pi-hole
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115

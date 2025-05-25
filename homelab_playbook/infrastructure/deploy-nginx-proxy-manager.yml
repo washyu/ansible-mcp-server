@@ -1,0 +1,139 @@
+---
+- name: Deploy Nginx Proxy Manager
+  hosts: homelab2
+  become: yes
+  vars:
+    npm_data_dir: /opt/nginx-proxy-manager
+    
+  tasks:
+    - name: Create NPM data directory
+      file:
+        path: "{{ npm_data_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Check if NPM is already running
+      docker_container_info:
+        name: nginx-proxy-manager
+      register: npm_info
+      ignore_errors: yes
+
+    - name: Deploy Nginx Proxy Manager
+      docker_container:
+        name: nginx-proxy-manager
+        image: jc21/nginx-proxy-manager:latest
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "80:80"
+          - "443:443"
+          - "81:81"
+        volumes:
+          - "{{ npm_data_dir }}/data:/data"
+          - "{{ npm_data_dir }}/letsencrypt:/etc/letsencrypt"
+        env:
+          DISABLE_IPV6: "true"
+      when: npm_info.container is not defined or not npm_info.container
+
+    - name: Wait for NPM to be ready
+      wait_for:
+        port: 81
+        host: localhost
+        delay: 10
+        timeout: 60
+
+    - name: Display access information
+      debug:
+        msg: |
+          Nginx Proxy Manager is now running!
+          
+          Access the admin panel at:
+          - Local: http://{{ ansible_default_ipv4.address }}:81
+          - Public: http://{{ ansible_hostname }}.shaunjackson.space:81
+          
+          Default credentials:
+          - Email: admin@example.com
+          - Password: changeme
+          
+          IMPORTANT: Change the default password immediately!
+          
+          Next steps:
+          1. Log in to NPM
+          2. Change admin password
+          3. Add SSL certificate
+          4. Configure proxy hosts for your services
+
+- name: Configure initial proxy hosts
+  hosts: homelab2
+  vars:
+    proxy_hosts:
+      - domain: "heimdall.shaunjackson.space"
+        forward_host: "localhost"
+        forward_port: 8080
+        service_name: "Heimdall Dashboard"
+      - domain: "grafana.shaunjackson.space"
+        forward_host: "localhost"
+        forward_port: 3000
+        service_name: "Grafana"
+      - domain: "portainer.shaunjackson.space"
+        forward_host: "localhost"
+        forward_port: 9000
+        service_name: "Portainer"
+      - domain: "pihole.shaunjackson.space"
+        forward_host: "192.168.10.1"
+        forward_port: 80
+        service_name: "Pi-hole"
+      - domain: "proxmox.shaunjackson.space"
+        forward_host: "192.168.10.20"
+        forward_port: 8006
+        service_name: "Proxmox"
+      - domain: "truenas.shaunjackson.space"
+        forward_host: "192.168.10.30"
+        forward_port: 80
+        service_name: "TrueNAS"
+
+  tasks:
+    - name: Create proxy host configuration guide
+      copy:
+        content: |
+          # Nginx Proxy Manager Configuration Guide
+          
+          ## Proxy Hosts to Configure
+          
+          After logging in to NPM, add these proxy hosts:
+          
+          {% for host in proxy_hosts %}
+          ### {{ loop.index }}. {{ host.service_name }}
+          - **Domain**: {{ host.domain }}
+          - **Forward Host**: {{ host.forward_host }}
+          - **Forward Port**: {{ host.forward_port }}
+          - **Enable SSL**: Yes (use Let's Encrypt)
+          - **Force SSL**: Yes
+          - **HTTP/2 Support**: Yes
+          - **HSTS Enabled**: Yes
+          
+          {% endfor %}
+          
+          ## DNS Configuration
+          
+          Make sure all subdomains point to your public IP:
+          - Create CNAME records for *.shaunjackson.space → shaunjackson.space
+          - Or create individual A records for each subdomain
+          
+          ## Router Configuration
+          
+          Forward these ports to {{ ansible_default_ipv4.address }}:
+          - Port 80 (HTTP)
+          - Port 443 (HTTPS)
+          
+          ## Testing
+          
+          After configuration, test each domain:
+          {% for host in proxy_hosts %}
+          - https://{{ host.domain }}
+          {% endfor %}
+        dest: "{{ npm_data_dir }}/proxy-hosts-config.md"
+
+    - name: Display configuration guide location
+      debug:
+        msg: "Proxy host configuration guide saved to: {{ npm_data_dir }}/proxy-hosts-config.md"

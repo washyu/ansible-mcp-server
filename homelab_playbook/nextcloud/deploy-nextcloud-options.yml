@@ -1,0 +1,151 @@
+---
+- name: Nextcloud Deployment Options
+  hosts: localhost
+  gather_facts: no
+  
+  tasks:
+    - name: Display Nextcloud deployment options
+      debug:
+        msg: |
+          ==========================================
+          Nextcloud Deployment Options
+          ==========================================
+          
+          Option 1: Download Nextcloud VM (Recommended)
+          - Official Nextcloud VM from Hanssonit
+          - Pre-configured with all features
+          - Download: https://github.com/nextcloud/vm/releases
+          - ~2GB download
+          
+          Option 2: Deploy Nextcloud AIO (All-in-One)
+          - Official Docker-based solution
+          - Includes OnlyOffice, Talk, etc.
+          - Better than our LXC approach
+          
+          Option 3: Standard VM with manual install
+          - Ubuntu Server 22.04 VM
+          - Install Nextcloud via snap or script
+          
+          Which option would you prefer?
+
+- name: Deploy Nextcloud AIO on Proxmox VM
+  hosts: proxmox
+  gather_facts: no
+  vars:
+    ansible_host: 192.168.10.200
+    ansible_user: root
+    ansible_password: Tenchi01!
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    vm_id: 111
+    vm_name: nextcloud-aio
+    vm_cores: 4
+    vm_memory: 8192
+    vm_disk_size: 100G
+    vm_storage: local-lvm
+    vm_bridge: vmbr0
+    vm_ip: 192.168.10.111
+    
+  tasks:
+    - name: Download Ubuntu 22.04 cloud image if not exists
+      get_url:
+        url: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+        dest: /var/lib/vz/template/qcow2/ubuntu-22.04-cloudimg.img
+        mode: '0644'
+      delegate_to: "{{ ansible_host }}"
+
+    - name: Create VM for Nextcloud AIO
+      shell: |
+        # Create VM
+        qm create {{ vm_id }} \
+          --name {{ vm_name }} \
+          --memory {{ vm_memory }} \
+          --cores {{ vm_cores }} \
+          --net0 virtio,bridge={{ vm_bridge }} \
+          --ostype l26 \
+          --scsihw virtio-scsi-pci \
+          --boot c --bootdisk scsi0
+        
+        # Import disk
+        qm importdisk {{ vm_id }} /var/lib/vz/template/qcow2/ubuntu-22.04-cloudimg.img {{ vm_storage }}
+        
+        # Attach disk
+        qm set {{ vm_id }} --scsi0 {{ vm_storage }}:vm-{{ vm_id }}-disk-0
+        
+        # Resize disk
+        qm resize {{ vm_id }} scsi0 {{ vm_disk_size }}
+        
+        # Add cloud-init drive
+        qm set {{ vm_id }} --ide2 {{ vm_storage }}:cloudinit
+        
+        # Configure cloud-init
+        qm set {{ vm_id }} --ciuser ncadmin --cipassword Tenchi01!
+        qm set {{ vm_id }} --ipconfig0 ip={{ vm_ip }}/24,gw=192.168.10.1
+        qm set {{ vm_id }} --nameserver 192.168.10.1
+        
+        # Enable QEMU agent
+        qm set {{ vm_id }} --agent 1
+        
+        # Start VM
+        qm start {{ vm_id }}
+
+    - name: Wait for VM to be ready
+      wait_for:
+        host: "{{ vm_ip }}"
+        port: 22
+        delay: 30
+        timeout: 300
+
+    - name: Create Nextcloud AIO installation script
+      copy:
+        dest: /tmp/install-nextcloud-aio.sh
+        content: |
+          #!/bin/bash
+          # Install Docker
+          curl -fsSL https://get.docker.com | sh
+          
+          # Install Nextcloud AIO
+          docker run -d \
+            --name nextcloud-aio-mastercontainer \
+            --restart always \
+            -p 80:80 \
+            -p 8080:8080 \
+            -p 8443:8443 \
+            -e APACHE_PORT=11000 \
+            -e APACHE_IP_BINDING=0.0.0.0 \
+            -v nextcloud_aio_mastercontainer:/mnt/docker-aio-config \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            nextcloud/all-in-one:latest
+          
+          echo "Nextcloud AIO installed!"
+          echo "Access at: https://{{ vm_ip }}:8080"
+          echo "Follow the setup wizard"
+        mode: '0755'
+
+    - name: Display completion message
+      debug:
+        msg: |
+          ==========================================
+          Nextcloud VM Created!
+          ==========================================
+          
+          VM ID: {{ vm_id }}
+          IP: {{ vm_ip }}
+          
+          To complete installation:
+          1. SSH to VM: ssh ncadmin@{{ vm_ip }} (password: Tenchi01!)
+          2. Run: curl -fsSL https://get.docker.com | sh
+          3. Run Nextcloud AIO:
+             docker run -d \
+               --name nextcloud-aio-mastercontainer \
+               --restart always \
+               -p 80:80 \
+               -p 8080:8080 \
+               -p 8443:8443 \
+               -e APACHE_PORT=11000 \
+               -v nextcloud_aio_mastercontainer:/mnt/docker-aio-config \
+               -v /var/run/docker.sock:/var/run/docker.sock:ro \
+               nextcloud/all-in-one:latest
+          
+          4. Access setup: https://{{ vm_ip }}:8080
+          5. Add to NPM: nextcloud.shaunjackson.space → {{ vm_ip }}:11000
+          ==========================================

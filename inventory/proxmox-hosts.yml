@@ -1,0 +1,11 @@
+all:
+  hosts:
+    proxmox:
+      ansible_host: 192.168.10.200
+      ansible_user: root
+      ansible_password: Tenchi01!
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    homelab2:
+      ansible_host: 192.168.10.20
+      ansible_user: shaun
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

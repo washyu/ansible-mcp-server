@@ -1,0 +1,202 @@
+---
+- name: Deploy Nextcloud on Proxmox LXC
+  hosts: proxmox
+  gather_facts: no
+  vars:
+    ansible_host: 192.168.10.200
+    ansible_user: root
+    ansible_password: Tenchi01!
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    lxc_id: 110
+    lxc_hostname: nextcloud
+    lxc_ip: 192.168.10.110
+    lxc_password: Tenchi01!
+    template_name: ubuntu-22.04-standard_22.04-1_amd64.tar.zst
+    
+  tasks:
+    - name: Install sshpass for password authentication
+      delegate_to: localhost
+      shell: which sshpass || sudo apt-get install -y sshpass
+      become: no
+      run_once: true
+
+    - name: Download Ubuntu template if not exists
+      shell: |
+        if ! pveam list local | grep -q "ubuntu-22.04"; then
+          pveam download local {{ template_name }}
+        fi
+      register: template_download
+
+    - name: Check if container already exists
+      shell: pct status {{ lxc_id }}
+      register: container_exists
+      ignore_errors: yes
+
+    - name: Stop and destroy existing container if exists
+      shell: |
+        pct stop {{ lxc_id }} || true
+        sleep 5
+        pct destroy {{ lxc_id }} || true
+      when: container_exists.rc == 0
+
+    - name: Create LXC container
+      shell: |
+        pct create {{ lxc_id }} local:vztmpl/{{ template_name }} \
+          --hostname {{ lxc_hostname }} \
+          --password {{ lxc_password }} \
+          --cores 4 \
+          --memory 4096 \
+          --storage local-lvm \
+          --rootfs local-lvm:100 \
+          --net0 name=eth0,bridge=vmbr0,ip={{ lxc_ip }}/24,gw=192.168.10.1 \
+          --features keyctl=1,nesting=1 \
+          --unprivileged 1
+      register: create_result
+
+    - name: Start container
+      shell: pct start {{ lxc_id }}
+      when: create_result is succeeded
+
+    - name: Wait for container to be ready
+      pause:
+        seconds: 20
+      when: create_result is succeeded
+
+    - name: Update container and install prerequisites
+      shell: |
+        pct exec {{ lxc_id }} -- apt-get update
+        pct exec {{ lxc_id }} -- apt-get install -y curl ca-certificates gnupg lsb-release
+
+    - name: Install Docker in container
+      shell: |
+        pct exec {{ lxc_id }} -- bash -c 'mkdir -p /etc/apt/keyrings'
+        pct exec {{ lxc_id }} -- bash -c 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
+        pct exec {{ lxc_id }} -- bash -c 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list'
+        pct exec {{ lxc_id }} -- apt-get update
+        pct exec {{ lxc_id }} -- apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+    - name: Install docker-compose
+      shell: |
+        pct exec {{ lxc_id }} -- bash -c 'curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
+        pct exec {{ lxc_id }} -- chmod +x /usr/local/bin/docker-compose
+
+    - name: Create Nextcloud directories
+      shell: |
+        pct exec {{ lxc_id }} -- mkdir -p /opt/nextcloud
+        pct exec {{ lxc_id }} -- mkdir -p /mnt/storage/nextcloud/data
+        pct exec {{ lxc_id }} -- mkdir -p /mnt/storage/nextcloud/config
+        pct exec {{ lxc_id }} -- mkdir -p /mnt/storage/nextcloud/apps
+
+    - name: Create docker-compose.yml for Nextcloud
+      shell: |
+        pct exec {{ lxc_id }} -- bash -c 'cat > /opt/nextcloud/docker-compose.yml << "EOF"
+        version: "3.8"
+
+        services:
+          nextcloud-db:
+            image: mariadb:10.11
+            container_name: nextcloud-db
+            restart: unless-stopped
+            environment:
+              - MYSQL_ROOT_PASSWORD=Tenchi01!
+              - MYSQL_DATABASE=nextcloud
+              - MYSQL_USER=nextcloud
+              - MYSQL_PASSWORD=Tenchi01!
+            volumes:
+              - nextcloud-db:/var/lib/mysql
+
+          nextcloud-redis:
+            image: redis:alpine
+            container_name: nextcloud-redis
+            restart: unless-stopped
+
+          nextcloud:
+            image: nextcloud:latest
+            container_name: nextcloud
+            restart: unless-stopped
+            ports:
+              - 80:80
+            depends_on:
+              - nextcloud-db
+              - nextcloud-redis
+            environment:
+              - MYSQL_HOST=nextcloud-db
+              - MYSQL_DATABASE=nextcloud
+              - MYSQL_USER=nextcloud
+              - MYSQL_PASSWORD=Tenchi01!
+              - REDIS_HOST=nextcloud-redis
+              - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.shaunjackson.space {{ lxc_ip }}
+              - OVERWRITEPROTOCOL=http
+              - OVERWRITEHOST=nextcloud.shaunjackson.space
+              - NEXTCLOUD_ADMIN_USER=admin
+              - NEXTCLOUD_ADMIN_PASSWORD=Tenchi01!
+            volumes:
+              - /mnt/storage/nextcloud/data:/var/www/html/data
+              - /mnt/storage/nextcloud/config:/var/www/html/config
+              - /mnt/storage/nextcloud/apps:/var/www/html/custom_apps
+
+          onlyoffice:
+            image: onlyoffice/documentserver:latest
+            container_name: onlyoffice
+            restart: unless-stopped
+            ports:
+              - 8080:80
+            environment:
+              - JWT_SECRET=your-secret-key
+            volumes:
+              - onlyoffice-data:/var/www/onlyoffice/Data
+              - onlyoffice-logs:/var/log/onlyoffice
+
+        volumes:
+          nextcloud-db:
+          onlyoffice-data:
+          onlyoffice-logs:
+        EOF'
+
+    - name: Start Nextcloud services
+      shell: |
+        pct exec {{ lxc_id }} -- bash -c 'cd /opt/nextcloud && docker-compose up -d'
+      register: nextcloud_start
+
+    - name: Wait for Nextcloud to be ready
+      shell: |
+        for i in {1..30}; do
+          if pct exec {{ lxc_id }} -- curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|302"; then
+            echo "Nextcloud is ready"
+            exit 0
+          fi
+          echo "Waiting for Nextcloud... attempt $i/30"
+          sleep 10
+        done
+        exit 1
+      register: nextcloud_ready
+
+    - name: Display deployment summary
+      debug:
+        msg: |
+          ==========================================
+          Nextcloud Deployment Complete!
+          ==========================================
+          
+          Container ID: {{ lxc_id }}
+          Container IP: {{ lxc_ip }}
+          
+          Access URLs:
+          - Direct: http://{{ lxc_ip }}
+          - Domain: http://nextcloud.shaunjackson.space (add to NPM)
+          - OnlyOffice: http://{{ lxc_ip }}:8080
+          
+          Admin Credentials:
+          - Username: admin
+          - Password: Tenchi01!
+          
+          Next Steps:
+          1. Add to Nginx Proxy Manager:
+             Domain: nextcloud.shaunjackson.space
+             Forward IP: {{ lxc_ip }}
+             Forward Port: 80
+          
+          2. Install "OpenID Connect Login" app from Nextcloud App Store
+          
+          3. Configure Microsoft OAuth with your app credentials
+          ==========================================

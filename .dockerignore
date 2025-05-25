@@ -1,0 +1,63 @@
+# Git
+.git/
+.gitignore
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Terraform
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+terraform.tfvars
+!terraform.tfvars.example
+
+# Ansible
+*.retry
+ansible.log
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+authorized_keys
+.ssh/
+
+# States and backups
+states/
+backups/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Tests
+tests/
+test-*.sh
+test-*.js
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

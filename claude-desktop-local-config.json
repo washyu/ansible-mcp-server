@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "ansible-homelab-local": {
+      "command": "node",
+      "args": ["C:\\path\\to\\ansible-mcp-server\\src\\index.js"],
+      "env": {
+        "PROXMOX_HOST": "192.168.10.200",
+        "PROXMOX_USER": "root@pam", 
+        "PROXMOX_PASSWORD": "Tenchi01!",
+        "PROXMOX_API_URL": "https://192.168.10.200:8006/api2/json",
+        "PROXMOX_NODE": "proxmox",
+        "PROXMOX_VERIFY_SSL": "false",
+        "DEFAULT_GATEWAY": "192.168.10.1",
+        "DEFAULT_STORAGE": "local-lvm",
+        "DEFAULT_BRIDGE": "vmbr0"
+      }
+    },
+    "ansible-homelab-ssh-batch": {
+      "command": "C:\\path\\to\\ansible-mcp-server\\mcp-ssh-wrapper.bat"
+    },
+    "ansible-homelab-wsl": {
+      "command": "wsl",
+      "args": [
+        "-e", "ssh", "-i", "/mnt/c/Users/washy/.ssh/mcp_key",
+        "-o", "StrictHostKeyChecking=no",
+        "mcp@192.168.10.100",
+        "/home/mcp/mcp-wrapper.sh"
+      ]
+    }
+  }
+}

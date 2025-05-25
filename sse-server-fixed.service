@@ -1,0 +1,26 @@
+[Unit]
+Description=MCP SSE Server
+After=network.target
+
+[Service]
+Type=simple
+User=mcp
+WorkingDirectory=/opt/ansible-mcp-server
+Environment="NODE_ENV=production"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+Environment="PYTHONPATH=/usr/local/lib/python3.10/dist-packages"
+EnvironmentFile=/opt/ansible-mcp-server/.env
+ExecStart=/usr/bin/node src/sse-server.js
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ansible-mcp-server
+ReadWritePaths=/tmp
+
+[Install]
+WantedBy=multi-user.target

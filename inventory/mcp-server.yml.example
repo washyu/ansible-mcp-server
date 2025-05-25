@@ -1,0 +1,13 @@
+all:
+  hosts:
+    mcp-server:
+      ansible_host: 192.168.10.100  # Change to your MCP server IP
+      ansible_user: root
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      
+  vars:
+    # Windows SSH public key (optional - for Claude Desktop access)
+    windows_ssh_pubkey: "ssh-rsa AAAAB3... your-windows-key-here"
+    
+    # GitHub repository (optional - if you want to pull from git)
+    # github_user: your-github-username

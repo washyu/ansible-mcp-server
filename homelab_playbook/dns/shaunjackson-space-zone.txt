@@ -1,0 +1,65 @@
+; Domain: shaunjackson.space
+; Updated for homelab infrastructure
+;
+; This file is intended for use for informational and archival
+; purposes ONLY and MUST be edited before use on a production
+; DNS server.
+;
+; In particular, you must update the SOA record with the correct
+; authoritative name server and contact e-mail address information,
+; and add the correct NS records for the name servers which will
+; be authoritative for this domain.
+;
+; For further information, please consult the BIND documentation
+; located on the following website:
+;
+; http://www.isc.org/
+;
+; And RFC 1035:
+;
+; http://www.ietf.org/rfc/rfc1035.txt
+;
+; Please note that we do NOT offer technical support for any use
+; of this zone data, the BIND name server, or any other third-
+; party DNS software.
+;
+; Use at your own risk.
+
+
+$ORIGIN shaunjackson.space.
+
+; SOA Record
+@    3600     IN     SOA    ns51.domaincontrol.com.    dns.jomax.net. (
+                    2025052300
+                    28800
+                    7200
+                    604800
+                    3600
+                    ) 
+
+; NS Record
+@    3600     IN     NS    ns51.domaincontrol.com.
+@    3600     IN     NS    ns52.domaincontrol.com.
+
+; MX Record - For email
+@    3600     IN     MX     10    mail.shaunjackson.space.
+
+; TXT Record - SPF for email
+@    3600     IN     TXT    "v=spf1 mx a ~all"
+
+; CNAME Records - Existing
+pay    3600     IN     CNAME    paylinks.commerce.godaddy.com.
+www    3600     IN     CNAME    sideboard.asuscomm.com.
+_domainconnect    3600     IN     CNAME    _domainconnect.gd.domaincontrol.com.
+
+; CNAME Records - Homelab Services
+mail       3600     IN     CNAME    sideboard.asuscomm.com.
+heimdall   3600     IN     CNAME    sideboard.asuscomm.com.
+grafana    3600     IN     CNAME    sideboard.asuscomm.com.
+portainer  3600     IN     CNAME    sideboard.asuscomm.com.
+proxmox    3600     IN     CNAME    sideboard.asuscomm.com.
+truenas    3600     IN     CNAME    sideboard.asuscomm.com.
+pihole     3600     IN     CNAME    sideboard.asuscomm.com.
+auth       3600     IN     CNAME    sideboard.asuscomm.com.
+npm        3600     IN     CNAME    sideboard.asuscomm.com.
+webmail    3600     IN     CNAME    sideboard.asuscomm.com.

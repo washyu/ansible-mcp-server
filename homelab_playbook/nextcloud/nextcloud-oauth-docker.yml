@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  nextcloud-db:
+    image: mariadb:10.11
+    container_name: nextcloud-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=Tenchi01!
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=Tenchi01!
+    volumes:
+      - nextcloud-db:/var/lib/mysql
+
+  nextcloud-redis:
+    image: redis:alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    ports:
+      - 8084:80
+    depends_on:
+      - nextcloud-db
+      - nextcloud-redis
+    environment:
+      # Database
+      - MYSQL_HOST=nextcloud-db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=Tenchi01!
+      - REDIS_HOST=nextcloud-redis
+      
+      # Trusted domains
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.shaunjackson.space 192.168.10.200
+      - OVERWRITEPROTOCOL=http
+      - OVERWRITEHOST=nextcloud.shaunjackson.space
+      
+      # Admin user (for initial setup)
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=Tenchi01!
+      
+    volumes:
+      # Main data storage - point this to your 12TB drive
+      - /mnt/storage/nextcloud/data:/var/www/html/data
+      - nextcloud-config:/var/www/html/config
+      - nextcloud-apps:/var/www/html/custom_apps
+
+  # Optional: OnlyOffice for document editing
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: onlyoffice
+    restart: unless-stopped
+    ports:
+      - 8086:80
+    environment:
+      - JWT_SECRET=your-secret-key
+    volumes:
+      - onlyoffice-data:/var/www/onlyoffice/Data
+      - onlyoffice-logs:/var/log/onlyoffice
+
+volumes:
+  nextcloud-db:
+  nextcloud-config:
+  nextcloud-apps:
+  onlyoffice-data:
+  onlyoffice-logs:
+
+# After deployment:
+# 1. Access http://192.168.10.200:8084
+# 2. Complete setup
+# 3. Install "OpenID Connect Login" app from Nextcloud app store
+# 4. Configure Microsoft OAuth:
+#    - Go to Settings → OpenID Connect
+#    - Provider: Custom
+#    - Client ID: <your-microsoft-client-id>
+#    - Client Secret: <your-microsoft-client-secret>
+#    - Discovery URL: https://login.microsoftonline.com/consumers/v2.0/.well-known/openid-configuration
+#    - Or manually set:
+#      - Authorize: https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize
+#      - Token: https://login.microsoftonline.com/consumers/oauth2/v2.0/token
+#      - UserInfo: https://graph.microsoft.com/oidc/userinfo
+#    - Scope: openid profile email

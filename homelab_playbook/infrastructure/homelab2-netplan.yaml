@@ -1,0 +1,14 @@
+# Netplan configuration for homelab2 static IP
+# Copy this to homelab2: /etc/netplan/01-netcfg.yaml
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      dhcp4: no
+      addresses:
+        - 192.168.10.20/24
+      gateway4: 192.168.10.1
+      nameservers:
+        addresses: 
+          - 192.168.10.1
+          - 8.8.8.8

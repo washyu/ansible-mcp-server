@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "ansible-homelab": {
+      "command": "ssh",
+      "args": [
+        "-i", "C:\\Users\\washy\\.ssh\\mcp_key",
+        "-o", "StrictHostKeyChecking=no",
+        "-o", "LogLevel=ERROR",
+        "mcp@192.168.10.100",
+        "/home/mcp/mcp-ssh-wrapper-debug.sh"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -1,0 +1,196 @@
+---
+- name: Deploy Nextcloud AIO on Ubuntu VM
+  hosts: proxmox
+  gather_facts: no
+  vars:
+    ansible_host: 192.168.10.200
+    ansible_user: root
+    ansible_password: Tenchi01!
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    
+    # VM Configuration
+    vm_id: 111
+    vm_name: nextcloud
+    vm_cores: 4
+    vm_memory: 8192
+    vm_disk_size: 100
+    vm_storage: local-lvm
+    vm_bridge: vmbr0
+    vm_ip: 192.168.10.111
+    ubuntu_iso: "ubuntu-22.04.4-live-server-amd64.iso"  # Update if different
+    
+  tasks:
+    - name: Check available ISOs
+      shell: |
+        ls /var/lib/vz/template/iso/ | grep -i ubuntu || echo "No Ubuntu ISO found"
+      register: iso_check
+
+    - name: Download Ubuntu Server ISO if not present
+      shell: |
+        if [ "{{ iso_check.stdout }}" == "No Ubuntu ISO found" ]; then
+          cd /var/lib/vz/template/iso/
+          wget https://releases.ubuntu.com/22.04.4/ubuntu-22.04.4-live-server-amd64.iso
+        fi
+      when: iso_check.stdout == "No Ubuntu ISO found"
+
+    - name: Check if VM exists
+      shell: qm status {{ vm_id }}
+      register: vm_exists
+      ignore_errors: yes
+
+    - name: Stop and remove existing VM
+      shell: |
+        qm stop {{ vm_id }} --timeout 30 || true
+        sleep 5
+        qm destroy {{ vm_id }} || true
+      when: vm_exists.rc == 0
+
+    - name: Create VM
+      shell: |
+        qm create {{ vm_id }} \
+          --name {{ vm_name }} \
+          --memory {{ vm_memory }} \
+          --cores {{ vm_cores }} \
+          --net0 virtio,bridge={{ vm_bridge }} \
+          --cdrom local:iso/{{ ubuntu_iso }} \
+          --boot order=scsi0 \
+          --ostype l26 \
+          --scsihw virtio-scsi-pci \
+          --agent 1 \
+          --onboot 1
+
+    - name: Create and attach disk
+      shell: |
+        qm set {{ vm_id }} --scsi0 {{ vm_storage }}:{{ vm_disk_size }},format=qcow2
+
+    - name: Add cloud-init drive for automation
+      shell: |
+        qm set {{ vm_id }} --ide2 {{ vm_storage }}:cloudinit
+        qm set {{ vm_id }} --ciuser ubuntu
+        qm set {{ vm_id }} --cipassword Tenchi01!
+        qm set {{ vm_id }} --ipconfig0 ip={{ vm_ip }}/24,gw=192.168.10.1
+        qm set {{ vm_id }} --nameserver 192.168.10.1
+        qm set {{ vm_id }} --sshkeys /root/.ssh/id_rsa.pub
+      ignore_errors: yes
+
+    - name: Start VM
+      shell: qm start {{ vm_id }}
+
+    - name: Create Nextcloud AIO setup script
+      copy:
+        dest: /tmp/setup-nextcloud-aio.sh
+        content: |
+          #!/bin/bash
+          # Nextcloud All-in-One Setup Script
+          
+          echo "=== Nextcloud AIO Setup ==="
+          
+          # Update system
+          sudo apt update && sudo apt upgrade -y
+          
+          # Install Docker
+          curl -fsSL https://get.docker.com | sudo sh
+          sudo usermod -aG docker $USER
+          
+          # Create directory for Nextcloud
+          sudo mkdir -p /opt/nextcloud-aio
+          cd /opt/nextcloud-aio
+          
+          # Create docker-compose.yml for Nextcloud AIO
+          cat > docker-compose.yml << 'EOF'
+          version: "3.8"
+          
+          services:
+            nextcloud-aio-mastercontainer:
+              image: nextcloud/all-in-one:latest
+              container_name: nextcloud-aio-mastercontainer
+              restart: always
+              ports:
+                - "80:80"
+                - "8080:8080"
+                - "8443:8443"
+              environment:
+                - APACHE_PORT=11000
+                - APACHE_IP_BINDING=0.0.0.0
+                - SKIP_DOMAIN_VALIDATION=true
+              volumes:
+                - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+                - /var/run/docker.sock:/var/run/docker.sock:ro
+          
+          volumes:
+            nextcloud_aio_mastercontainer:
+              name: nextcloud_aio_mastercontainer
+          EOF
+          
+          # Start Nextcloud AIO
+          sudo docker compose up -d
+          
+          echo ""
+          echo "==================================="
+          echo "Nextcloud AIO is starting!"
+          echo "==================================="
+          echo ""
+          echo "Access the setup wizard at:"
+          echo "https://{{ vm_ip }}:8080"
+          echo ""
+          echo "Initial setup:"
+          echo "1. Open https://{{ vm_ip }}:8080"
+          echo "2. Follow the AIO setup wizard"
+          echo "3. Set your Nextcloud domain"
+          echo "4. Choose which apps to install"
+          echo ""
+          echo "For NPM:"
+          echo "- Domain: nextcloud.shaunjackson.space"
+          echo "- Forward to: {{ vm_ip }}:11000"
+          echo "- Enable Websockets"
+          echo "==================================="
+        mode: '0755'
+
+    - name: Display setup instructions
+      debug:
+        msg: |
+          ==========================================
+          Nextcloud VM Created!
+          ==========================================
+          
+          VM ID: {{ vm_id }}
+          VM IP: {{ vm_ip }}
+          
+          Manual Installation Steps:
+          1. Open Proxmox console for VM {{ vm_id }}
+          2. Complete Ubuntu installation:
+             - Username: ubuntu
+             - Password: Tenchi01!
+             - Hostname: nextcloud
+             - IP: {{ vm_ip }}/24
+             - Gateway: 192.168.10.1
+             - DNS: 192.168.10.1
+          
+          3. After Ubuntu installs, SSH to the VM:
+             ssh ubuntu@{{ vm_ip }}
+          
+          4. Run the setup script:
+             wget http://{{ ansible_host }}:8006/setup-nextcloud-aio.sh
+             chmod +x setup-nextcloud-aio.sh
+             ./setup-nextcloud-aio.sh
+          
+          5. Access Nextcloud AIO wizard:
+             https://{{ vm_ip }}:8080
+          
+          Why Nextcloud AIO?
+          - Official all-in-one solution
+          - Includes: Nextcloud, OnlyOffice, Talk, Mail
+          - Automatic HTTPS with Let's Encrypt
+          - Built-in backup solution
+          - Automatic updates
+          - High performance caching
+          ==========================================
+
+- name: Save setup script locally
+  hosts: localhost
+  tasks:
+    - name: Copy setup script for reference
+      copy:
+        src: /tmp/setup-nextcloud-aio.sh
+        dest: /home/shaun/ansible-mcp-server/nextcloud-aio-setup.sh
+        mode: '0755'

@@ -1,0 +1,71 @@
+services:
+  mcp-server:
+    build: .
+    image: ansible-mcp-server:latest
+    container_name: ansible-mcp-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - MCP_MODE=stdio
+    volumes:
+      # SSH keys - mount your SSH key for accessing servers
+      - ${SSH_KEY_PATH:-~/.ssh/id_rsa}:/home/mcp/.ssh/id_rsa:ro
+      - ${SSH_PUB_KEY_PATH:-~/.ssh/id_rsa.pub}:/home/mcp/.ssh/id_rsa.pub:ro
+      
+      # Persistent data
+      - ./states:/opt/ansible-mcp-server/states
+      - ./terraform/cache:/home/mcp/.terraform.d/plugin-cache
+      
+      # Custom playbooks (optional)
+      - ./homelab_playbook:/opt/ansible-mcp-server/homelab_playbook:ro
+      
+      # Ansible inventory (optional)
+      - ./inventory:/opt/ansible-mcp-server/inventory:ro
+    
+    # For SSH-based access (Claude Desktop)
+    ports:
+      - "2222:22"
+    
+    # For development/debugging
+    stdin_open: true
+    tty: true
+    
+    # Network mode - use host if you need to access local services
+    # network_mode: host
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Optional: SSH tunnel for Windows Claude Desktop
+  # Uncomment if you want to use SSH tunnel instead of direct connection
+  # ssh-tunnel:
+  #   image: alpine/sshd:latest
+  #   container_name: mcp-ssh-tunnel
+  #   restart: unless-stopped
+  #   ports:
+  #     - "2222:22"
+  #   volumes:
+  #     - ${WINDOWS_SSH_PUBKEY:-./ssh/authorized_keys}:/home/mcp/.ssh/authorized_keys:ro
+  #   environment:
+  #     - USER=mcp
+  #     - SUDO_ACCESS=false
+  #   depends_on:
+  #     - mcp-server
+
+# Optional: Create external network for better isolation
+# networks:
+#   default:
+#     driver: bridge

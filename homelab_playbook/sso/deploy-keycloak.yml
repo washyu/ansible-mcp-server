@@ -1,0 +1,152 @@
+---
+- name: Deploy Keycloak SSO
+  hosts: homelab2
+  become: yes
+  vars:
+    keycloak_dir: /opt/keycloak
+    keycloak_admin_user: admin
+    keycloak_admin_password: "{{ vault_keycloak_admin_password | default('ChangeMe123!') }}"
+    postgres_password: "{{ vault_postgres_password | default('KeycloakDB123!') }}"
+    
+  tasks:
+    - name: Create Keycloak directory
+      file:
+        path: "{{ keycloak_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create docker network for Keycloak
+      docker_network:
+        name: keycloak-network
+
+    - name: Deploy PostgreSQL for Keycloak
+      docker_container:
+        name: keycloak-postgres
+        image: postgres:15-alpine
+        state: started
+        restart_policy: unless-stopped
+        networks:
+          - name: keycloak-network
+        volumes:
+          - "{{ keycloak_dir }}/postgres-data:/var/lib/postgresql/data"
+        env:
+          POSTGRES_DB: keycloak
+          POSTGRES_USER: keycloak
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+
+    - name: Wait for PostgreSQL to be ready
+      wait_for:
+        port: 5432
+        host: localhost
+        delay: 10
+        timeout: 60
+
+    - name: Deploy Keycloak
+      docker_container:
+        name: keycloak
+        image: quay.io/keycloak/keycloak:latest
+        state: started
+        restart_policy: unless-stopped
+        networks:
+          - name: keycloak-network
+        ports:
+          - "8080:8080"
+        env:
+          KC_DB: postgres
+          KC_DB_URL: "jdbc:postgresql://keycloak-postgres:5432/keycloak"
+          KC_DB_USERNAME: keycloak
+          KC_DB_PASSWORD: "{{ postgres_password }}"
+          KEYCLOAK_ADMIN: "{{ keycloak_admin_user }}"
+          KEYCLOAK_ADMIN_PASSWORD: "{{ keycloak_admin_password }}"
+          KC_HOSTNAME_STRICT: "false"
+          KC_PROXY: "edge"
+          KC_HTTP_ENABLED: "true"
+        command: start-dev
+
+    - name: Wait for Keycloak to be ready
+      wait_for:
+        port: 8080
+        host: localhost
+        delay: 30
+        timeout: 120
+
+    - name: Create Keycloak configuration guide
+      copy:
+        content: |
+          # Keycloak SSO Configuration Guide
+          
+          ## Access Information
+          - **URL**: http://{{ ansible_default_ipv4.address }}:8080
+          - **Admin Console**: http://{{ ansible_default_ipv4.address }}:8080/admin
+          - **Admin User**: {{ keycloak_admin_user }}
+          - **Admin Password**: {{ keycloak_admin_password }}
+          
+          ## After NPM Setup
+          - **Public URL**: https://auth.shaunjackson.space
+          
+          ## Initial Configuration Steps
+          
+          1. **Create a Realm**
+             - Name: homelab
+             - Display name: Homelab SSO
+          
+          2. **Configure Email Settings** (for password resets)
+             - Go to Realm Settings → Email
+             - Configure SMTP settings
+          
+          3. **Create Users**
+             - Go to Users → Add User
+             - Create your main user account
+             - Set password (temporary = OFF)
+          
+          4. **Create Clients** (for each service)
+             Example for Grafana:
+             - Client ID: grafana
+             - Protocol: openid-connect
+             - Access Type: confidential
+             - Valid Redirect URIs: https://grafana.shaunjackson.space/*
+          
+          ## Service Integration Examples
+          
+          ### Grafana
+          ```ini
+          [auth.generic_oauth]
+          enabled = true
+          name = Keycloak
+          client_id = grafana
+          client_secret = <from keycloak>
+          scopes = openid email profile
+          auth_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect/auth
+          token_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect/token
+          api_url = https://auth.shaunjackson.space/realms/homelab/protocol/openid-connect/userinfo
+          ```
+          
+          ### Proxmox
+          - Add OpenID Connect realm
+          - Use Keycloak endpoints
+          
+          ### Portainer
+          - OAuth configuration available in settings
+          
+          ## NPM Proxy Configuration
+          Add proxy host for:
+          - Domain: auth.shaunjackson.space
+          - Forward to: localhost:8080
+          - Enable SSL with Let's Encrypt
+        dest: "{{ keycloak_dir }}/keycloak-setup-guide.md"
+
+    - name: Display setup information
+      debug:
+        msg: |
+          Keycloak is now running!
+          
+          Access at: http://{{ ansible_default_ipv4.address }}:8080/admin
+          Username: {{ keycloak_admin_user }}
+          Password: {{ keycloak_admin_password }}
+          
+          Configuration guide: {{ keycloak_dir }}/keycloak-setup-guide.md
+          
+          Next steps:
+          1. Add auth.shaunjackson.space to NPM
+          2. Create homelab realm
+          3. Add users and configure services

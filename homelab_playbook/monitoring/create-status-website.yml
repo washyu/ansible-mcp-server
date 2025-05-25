@@ -1,0 +1,212 @@
+---
+- name: Create Homelab Status Website
+  hosts: homelab2
+  become: yes
+  vars:
+    website_dir: /opt/homelab-website
+    website_port: 8888
+    
+  tasks:
+    - name: Gather facts from all hosts
+      setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      loop: "{{ groups['all'] }}"
+
+    - name: Create website directory
+      file:
+        path: "{{ website_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Generate status page HTML
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Shaun's Homelab</title>
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      background: #1a1a2e;
+                      color: #eee;
+                      line-height: 1.6;
+                  }
+                  .container {
+                      max-width: 1200px;
+                      margin: 0 auto;
+                      padding: 20px;
+                  }
+                  h1 {
+                      text-align: center;
+                      margin-bottom: 30px;
+                      color: #4a7c7e;
+                      font-size: 2.5em;
+                  }
+                  .grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                      gap: 20px;
+                      margin-bottom: 30px;
+                  }
+                  .card {
+                      background: #0f3460;
+                      border-radius: 10px;
+                      padding: 20px;
+                      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                      transition: transform 0.2s;
+                  }
+                  .card:hover {
+                      transform: translateY(-5px);
+                      box-shadow: 0 8px 12px rgba(0,0,0,0.4);
+                  }
+                  .card h2 {
+                      color: #4a7c7e;
+                      margin-bottom: 15px;
+                      display: flex;
+                      align-items: center;
+                      gap: 10px;
+                  }
+                  .status {
+                      display: inline-block;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 50%;
+                      background: #4CAF50;
+                  }
+                  .info-row {
+                      display: flex;
+                      justify-content: space-between;
+                      margin: 8px 0;
+                      padding: 5px 0;
+                      border-bottom: 1px solid #333;
+                  }
+                  .info-label {
+                      color: #888;
+                  }
+                  .service-link {
+                      display: inline-block;
+                      margin: 5px 0;
+                      padding: 8px 15px;
+                      background: #4a7c7e;
+                      color: white;
+                      text-decoration: none;
+                      border-radius: 5px;
+                      transition: background 0.2s;
+                  }
+                  .service-link:hover {
+                      background: #5a8c8e;
+                  }
+                  .services {
+                      margin-top: 30px;
+                  }
+                  .timestamp {
+                      text-align: center;
+                      color: #666;
+                      margin-top: 20px;
+                      font-size: 0.9em;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🏠 Shaun's Homelab Infrastructure</h1>
+                  
+                  <div class="grid">
+                      {% for host in groups['all'] %}
+                      {% set host_facts = hostvars[host] %}
+                      <div class="card">
+                          <h2><span class="status"></span> {{ host }}</h2>
+                          <div class="info-row">
+                              <span class="info-label">IP Address:</span>
+                              <span>{{ host_facts.ansible_default_ipv4.address | default('N/A') }}</span>
+                          </div>
+                          <div class="info-row">
+                              <span class="info-label">OS:</span>
+                              <span>{{ host_facts.ansible_distribution | default('Unknown') }} {{ host_facts.ansible_distribution_version | default('') }}</span>
+                          </div>
+                          <div class="info-row">
+                              <span class="info-label">CPU:</span>
+                              <span>{{ host_facts.ansible_processor_vcpus | default('N/A') }} cores</span>
+                          </div>
+                          <div class="info-row">
+                              <span class="info-label">Memory:</span>
+                              <span>{{ (host_facts.ansible_memtotal_mb | default(0) / 1024) | round(1) }} GB</span>
+                          </div>
+                          <div class="info-row">
+                              <span class="info-label">Role:</span>
+                              <span>
+                                  {% if host == 'homelab2' %}Management/Docker
+                                  {% elif host == 'linuxrwifi' %}DNS/Pi-hole
+                                  {% elif host == 'truenas' %}Storage/TrueNAS
+                                  {% elif host == 'amdaiserver' %}Virtualization/Proxmox
+                                  {% endif %}
+                              </span>
+                          </div>
+                      </div>
+                      {% endfor %}
+                  </div>
+                  
+                  <div class="services">
+                      <h2>🚀 Available Services</h2>
+                      <div class="grid">
+                          <div class="card">
+                              <h3>Management</h3>
+                              <a href="https://heimdall.shaunjackson.space" class="service-link">Heimdall Dashboard</a>
+                              <a href="https://portainer.shaunjackson.space" class="service-link">Portainer</a>
+                              <a href="https://npm.shaunjackson.space" class="service-link">Nginx Proxy Manager</a>
+                          </div>
+                          <div class="card">
+                              <h3>Monitoring</h3>
+                              <a href="https://grafana.shaunjackson.space" class="service-link">Grafana</a>
+                              <a href="https://prometheus.shaunjackson.space" class="service-link">Prometheus</a>
+                          </div>
+                          <div class="card">
+                              <h3>Infrastructure</h3>
+                              <a href="https://proxmox.shaunjackson.space" class="service-link">Proxmox</a>
+                              <a href="https://truenas.shaunjackson.space" class="service-link">TrueNAS</a>
+                              <a href="https://pihole.shaunjackson.space" class="service-link">Pi-hole</a>
+                          </div>
+                          <div class="card">
+                              <h3>Authentication</h3>
+                              <a href="https://auth.shaunjackson.space" class="service-link">Keycloak SSO</a>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <p class="timestamp">Last updated: {{ ansible_date_time.iso8601 }}</p>
+              </div>
+          </body>
+          </html>
+        dest: "{{ website_dir }}/index.html"
+
+    - name: Deploy nginx container for website
+      docker_container:
+        name: homelab-website
+        image: nginx:alpine
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ website_port }}:80"
+        volumes:
+          - "{{ website_dir }}:/usr/share/nginx/html:ro"
+
+    - name: Display website information
+      debug:
+        msg: |
+          Status website created!
+          
+          Local access: http://{{ ansible_default_ipv4.address }}:{{ website_port }}
+          
+          To make it public, add to NPM:
+          - Domain: shaunjackson.space (or www.shaunjackson.space)
+          - Forward to: localhost:{{ website_port }}
+          
+          The website will show:
+          - All server statuses
+          - Quick links to services
+          - Last update timestamp

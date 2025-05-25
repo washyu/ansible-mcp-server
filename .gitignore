@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.local
+.mcp-context.json
+.external-servers.json
+inventory/external-servers.yml
+environments.json
+terraform/
+playbooks/
+state-captures/
+*.log
+*.pid

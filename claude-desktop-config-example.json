@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ansible-mcp": {
+      "command": "cmd",
+      "args": ["/c", "C:\\Users\\%USERNAME%\\.mcp-proxy\\mcp-proxy.bat"]
+    }
+  }
+}

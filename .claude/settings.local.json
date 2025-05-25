@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(terraform:*)",
+      "Bash(./deploy-mcp-to-proxmox.sh:*)",
+      "Bash(ansible proxmox:*)",
+      "Bash(ansible-playbook:*)",
+      "Bash(ansible:*)",
+      "Bash(ssh:*)",
+      "Bash(rm:*)",
+      "Bash(./setup.sh:*)",
+      "Bash(bash:*)",
+      "Bash(docker build:*)",
+      "Bash(docker:*)",
+      "Bash(sudo usermod:*)",
+      "Bash(sudo docker compose build:*)",
+      "Bash(node:*)",
+      "Bash(grep:*)",
+      "Bash(zip:*)",
+      "Bash(./push-sse-updates.sh:*)",
+      "Bash(scp:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}
