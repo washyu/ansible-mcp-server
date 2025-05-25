@@ -4,6 +4,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 const execAsync = promisify(exec);
 
@@ -33,7 +34,7 @@ export const serverManagementTools = [
   {
     name: 'server-restart',
     description: 'Restart MCP or SSE server to recover from errors',
-    inputSchema: restartServiceSchema,
+    inputSchema: zodToJsonSchema(restartServiceSchema),
     handler: async (args) => {
       const { service, reason } = args;
       
@@ -87,7 +88,7 @@ export const serverManagementTools = [
   {
     name: 'server-logs',
     description: 'Get server logs for debugging',
-    inputSchema: getLogsSchema,
+    inputSchema: zodToJsonSchema(getLogsSchema),
     handler: async (args) => {
       const { service, lines, since } = args;
       
@@ -129,7 +130,7 @@ export const serverManagementTools = [
   {
     name: 'server-health',
     description: 'Check server health and dependencies',
-    inputSchema: checkHealthSchema,
+    inputSchema: zodToJsonSchema(checkHealthSchema),
     handler: async (args) => {
       const { detailed } = args;
       
@@ -217,7 +218,7 @@ export const serverManagementTools = [
   {
     name: 'server-debug',
     description: 'Run diagnostic commands for debugging',
-    inputSchema: debugCommandSchema,
+    inputSchema: zodToJsonSchema(debugCommandSchema),
     handler: async (args) => {
       const { command, safe } = args;
       

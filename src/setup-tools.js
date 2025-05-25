@@ -2,6 +2,7 @@
 // Allows Claude to configure the environment by asking the user for details
 
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -117,7 +118,7 @@ export const setupTools = [
   {
     name: 'setup-proxmox',
     description: 'Configure Proxmox connection settings',
-    inputSchema: ConfigureProxmoxSchema,
+    inputSchema: zodToJsonSchema(ConfigureProxmoxSchema),
     handler: async (args) => {
       try {
         const updates = {};
@@ -169,7 +170,7 @@ Configuration saved to .env file.`
   {
     name: 'setup-network',
     description: 'Configure network settings for VMs',
-    inputSchema: ConfigureNetworkSchema,
+    inputSchema: zodToJsonSchema(ConfigureNetworkSchema),
     handler: async (args) => {
       try {
         const updates = {
@@ -206,7 +207,7 @@ Configuration saved to .env file.`
   {
     name: 'setup-services',
     description: 'Configure IP addresses for services',
-    inputSchema: ConfigureServicesSchema,
+    inputSchema: zodToJsonSchema(ConfigureServicesSchema),
     handler: async (args) => {
       try {
         const updates = {};
@@ -249,7 +250,7 @@ Configuration saved to .env file.`
   {
     name: 'get-config',
     description: 'Get current configuration values',
-    inputSchema: GetConfigSchema,
+    inputSchema: zodToJsonSchema(GetConfigSchema),
     handler: async (args) => {
       try {
         const config = await readConfig();
@@ -318,7 +319,7 @@ Configuration saved to .env file.`
   {
     name: 'test-connection',
     description: 'Test connection to configured services',
-    inputSchema: TestConnectionSchema,
+    inputSchema: zodToJsonSchema(TestConnectionSchema),
     handler: async (args) => {
       try {
         let output = '';
@@ -389,7 +390,7 @@ Configuration saved to .env file.`
   {
     name: 'setup-wizard',
     description: 'Run interactive setup wizard to configure all settings',
-    inputSchema: z.object({}),
+    inputSchema: zodToJsonSchema(z.object({})),
     handler: async () => {
       try {
         const output = `Welcome to MCP Server Setup Wizard!
