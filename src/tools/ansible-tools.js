@@ -57,6 +57,12 @@ const CreatePlaybookSchema = z.object({
   become: z.boolean().optional().default(false).describe('Use sudo for all tasks')
 });
 
+const ListHostsSchema = z.object({
+  inventory: z.string().optional().describe('Path to inventory file (default: inventory/hosts.yml)'),
+  group: z.string().optional().describe('Filter by specific group'),
+  format: z.enum(['list', 'json', 'yaml']).optional().default('list').describe('Output format')
+});
+
 // Helper functions
 async function executeAnsibleCommand(command, args, options = {}) {
   const defaultOptions = {
@@ -277,6 +283,59 @@ const ansibleTools = [
         success: true,
         output: `Created playbook: ${playbookPath}`,
         error: ''
+      };
+    }
+  },
+
+  {
+    name: 'list-hosts',
+    description: 'List all hosts in inventory',
+    inputSchema: ListHostsSchema,
+    handler: async (args) => {
+      const validatedArgs = ListHostsSchema.parse(args);
+      const inventory = validatedArgs.inventory || 'inventory/hosts.yml';
+      
+      const commandArgs = ['-i', inventory, '--list-hosts'];
+      
+      if (validatedArgs.group) {
+        commandArgs.push(validatedArgs.group);
+      } else {
+        commandArgs.push('all');
+      }
+      
+      const result = await executeAnsibleCommand('ansible', commandArgs);
+      
+      if (result.exitCode === 0) {
+        // Parse the output based on format requested
+        const hosts = result.stdout.split('\n')
+          .map(line => line.trim())
+          .filter(line => line && !line.startsWith('hosts ('));
+        
+        let output;
+        switch (validatedArgs.format) {
+          case 'json':
+            output = JSON.stringify(hosts, null, 2);
+            break;
+          case 'yaml':
+            output = hosts.map(h => `- ${h}`).join('\n');
+            break;
+          case 'list':
+          default:
+            output = hosts.join('\n');
+        }
+        
+        return {
+          success: true,
+          output: output,
+          error: ''
+        };
+      }
+      
+      return {
+        success: false,
+        output: '',
+        error: result.stderr,
+        exitCode: result.exitCode
       };
     }
   }

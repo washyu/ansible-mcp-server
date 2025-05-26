@@ -220,43 +220,16 @@ rl.on('line', async (line) => {
         return;
       } else if (msg.method === 'tools/list' && msg.id !== undefined) {
         console.error('Received tools/list request with id:', msg.id);
+        console.error('Forwarding tools/list to MCP server');
         
-        // Send synthetic tools list response
-        const toolsResponse = {
-          result: {
-            tools: [
-              { name: "test-connection", description: "Test connection to a target host", inputSchema: { type: "object", properties: { target: { type: "string" } }, required: ["target"] } },
-              { name: "run-playbook", description: "Run an Ansible playbook", inputSchema: { type: "object", properties: { playbook: { type: "string" } }, required: ["playbook"] } },
-              { name: "list-hosts", description: "List all hosts in inventory", inputSchema: { type: "object", properties: {} } }
-            ]
-          },
-          jsonrpc: '2.0',
-          id: msg.id
-        };
-        
-        console.error('Sending synthetic tools/list response');
-        process.stdout.write(JSON.stringify(toolsResponse) + '\n');
-        
-        // Don't forward to server
-        return;
+        // Forward the tools/list request to the actual MCP server
+        // The response will come back through the SSE connection
       } else if (msg.method === 'tools/call' && msg.id !== undefined) {
         console.error('Received tools/call request:', msg.params?.name);
+        console.error('Forwarding tools/call to MCP server');
         
-        // Send error response for all tool calls
-        const errorResponse = {
-          error: {
-            code: -32603,
-            message: "MCP server is currently unavailable due to stdout capture issue. See GitHub issue #28."
-          },
-          jsonrpc: '2.0',
-          id: msg.id
-        };
-        
-        console.error('Sending error response for tool call');
-        process.stdout.write(JSON.stringify(errorResponse) + '\n');
-        
-        // Don't forward to server
-        return;
+        // Forward the tools/call request to the actual MCP server
+        // The response will come back through the SSE connection
       }
     } catch (e) {
       // Not JSON or parse error, continue normally
