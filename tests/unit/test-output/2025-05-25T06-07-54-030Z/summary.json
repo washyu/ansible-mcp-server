@@ -1,9 +1,0 @@
-{
-  "timestamp": "2025-05-25T06-07-54-030Z",
-  "captureDir": "/home/shaun/ansible-mcp-server/tests/unit/test-output/2025-05-25T06-07-54-030Z",
-  "results": [
-    "✓ Captured VM inventory",
-    "✓ Generated infrastructure diagram",
-    "✓ Captured running services"
-  ]
-}

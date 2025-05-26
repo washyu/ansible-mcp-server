@@ -1,5 +1,4 @@
-# Ansible MCP Server Testing Guide
-
+# Ansible MCP Server Testing 
 ## Overview
 
 This guide documents the testing procedures for the Ansible MCP Server project. We use a multi-layered testing approach to ensure code quality and prevent regressions.

@@ -1,0 +1,39 @@
+{
+  "environment": "dev",
+  "description": "Development environment for local testing",
+  "mcp": {
+    "sseUrl": "http://192.168.10.102:3001/sse",
+    "apiToken": "75bf9cbcf951ed970c96431f77985d7588d1229d5b3f29e0555a177f628f55d5"
+  },
+  "proxmox": {
+    "host": "192.168.10.200",
+    "apiTokenId": "root@pam!asable-mcp",
+    "apiTokenSecret": "34772c72-4c3a-4f65-b67d-25620f1cb628",
+    "node": "proxmox",
+    "templateId": 9000
+  },
+  "test": {
+    "vmId": 501,
+    "vmIP": "192.168.10.201",
+    "network": {
+      "gateway": "192.168.10.1",
+      "subnet": "192.168.10.0/24",
+      "dns": "8.8.8.8"
+    },
+    "timeout": 600,
+    "retries": 3,
+    "cleanupOnFailure": true
+  },
+  "target": {
+    "sshUser": "shaun",
+    "sshPassword": "Tenchi01!",
+    "sudoPassword": "Tenchi01!"
+  },
+  "services": {
+    "jenkins": {
+      "port": 8080,
+      "healthCheckPath": "/",
+      "startupTime": 60
+    }
+  }
+}

@@ -9,6 +9,7 @@ import { serviceToolDefinitions, serviceToolHandlers } from './service-tools.js'
 import { environmentToolDefinitions, environmentToolHandlers } from './environment-tools.js';
 import { externalServerToolDefinitions, externalServerToolHandlers } from './external-server-tools.js';
 import { hardwareToolDefinitions, hardwareToolHandlers } from './hardware-discovery-tools.js';
+import { enhancedVMToolDefinitions, enhancedVMToolHandlers } from './enhanced-vm-tools.js';
 import { securityTools } from '../security-tools.js';
 import { serverManagementTools } from '../server-management-tools.js';
 import { setupTools } from '../setup-tools.js';
@@ -171,6 +172,7 @@ toolRegistry.registerTools(serviceToolDefinitions, serviceToolHandlers);
 toolRegistry.registerTools(environmentToolDefinitions, environmentToolHandlers);
 toolRegistry.registerTools(externalServerToolDefinitions, externalServerToolHandlers);
 toolRegistry.registerTools(hardwareToolDefinitions, hardwareToolHandlers);
+toolRegistry.registerTools(enhancedVMToolDefinitions, enhancedVMToolHandlers);
 
 // Register legacy tools (already have JSON Schema format)
 const legacySecurityTools = securityTools.map(tool => ({

@@ -119,11 +119,30 @@ See [Windows Setup Guide](docs/windows-claude-desktop-setup.md) for details.
 
 ## Testing
 
-Run the comprehensive test suite:
+Run the comprehensive feature test suite:
 
 ```bash
-./run-v1-tests.sh
+# Run tests in development environment
+npm test
+
+# Test specific environments
+npm run test:dev      # Development
+npm run test:qa       # QA
+npm run test:staging  # Staging
+npm run test:prod     # Production
+
+# Verbose output for debugging
+npm run test:verbose
 ```
+
+Our feature tests validate complete VM lifecycle workflows including:
+- VM creation from Proxmox templates
+- Service installation (Jenkins, etc.)
+- Service verification and management
+- VM deletion and cleanup
+- MCP context management
+
+See [Testing Guidelines](tests/TESTING-GUIDELINES.md) for detailed information.
 
 ## Contributing
 

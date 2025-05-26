@@ -7,48 +7,32 @@ export default {
   },
   transform: {},
   
-  // Test file patterns
+  // Test file patterns - currently no Jest tests, all feature tests run independently
   testMatch: [
-    '**/tests/**/*.test.js',
-    '**/tests/**/*.spec.js'
+    '**/tests/**/*.test.js'
   ],
   
   // Ignore patterns
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/tests/generators/',  // Don't run the generator itself as a test
+    '/tests/feature/', // Feature tests run independently via run-feature-tests.sh
+    '/archive/'
   ],
   
-  // Coverage configuration
-  collectCoverage: true,
+  // Coverage configuration - minimal since we focus on feature tests
+  collectCoverage: false,
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.js',
-    '!src/**/*.test.js',
-    '!src/**/*.spec.js',
-    '!**/node_modules/**'
+    '!src/**/*.test.js'
   ],
-  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
-  coverageThreshold: {
-    global: {
-      branches: 10,
-      functions: 10,
-      lines: 10,
-      statements: 10
-    }
-  },
-  
-  // Setup and teardown
-  globalSetup: './tests/setup/globalSetup.js',
-  globalTeardown: './tests/setup/globalTeardown.js',
-  setupFilesAfterEnv: ['./tests/setup/jest.setup.js'],
   
   // Performance
-  maxWorkers: '50%',
+  maxWorkers: 1,
   
-  // Timeout for async tests (30 seconds)
-  testTimeout: 30000,
+  // Timeout for any remaining tests
+  testTimeout: 10000,
   
-  // Verbose output
-  verbose: true
+  // Minimal output since main tests are feature tests
+  verbose: false
 };

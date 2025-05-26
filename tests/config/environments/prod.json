@@ -1,0 +1,39 @@
+{
+  "environment": "prod",
+  "description": "Production environment for final validation",
+  "mcp": {
+    "sseUrl": "https://prod-mcp.company.com:3001/sse",
+    "apiToken": "${MCP_API_TOKEN}"
+  },
+  "proxmox": {
+    "host": "${PROXMOX_HOST}",
+    "apiTokenId": "${PROXMOX_API_TOKEN_ID}",
+    "apiTokenSecret": "${PROXMOX_API_TOKEN_SECRET}",
+    "node": "prod-proxmox",
+    "templateId": 9000
+  },
+  "test": {
+    "vmId": 800,
+    "vmIP": "10.10.40.100",
+    "network": {
+      "gateway": "10.10.40.1",
+      "subnet": "10.10.40.0/24",
+      "dns": "10.10.1.10"
+    },
+    "timeout": 1800,
+    "retries": 2,
+    "cleanupOnFailure": false
+  },
+  "target": {
+    "sshUser": "${TARGET_SSH_USER}",
+    "sshPassword": "${TARGET_SSH_PASSWORD}",
+    "sudoPassword": "${TARGET_SUDO_PASSWORD}"
+  },
+  "services": {
+    "jenkins": {
+      "port": 8080,
+      "healthCheckPath": "/login",
+      "startupTime": 180
+    }
+  }
+}

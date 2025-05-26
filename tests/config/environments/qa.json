@@ -1,0 +1,39 @@
+{
+  "environment": "qa",
+  "description": "QA environment for integration testing",
+  "mcp": {
+    "sseUrl": "http://qa-mcp.company.com:3001/sse",
+    "apiToken": "${MCP_API_TOKEN}"
+  },
+  "proxmox": {
+    "host": "${PROXMOX_HOST}",
+    "apiTokenId": "${PROXMOX_API_TOKEN_ID}",
+    "apiTokenSecret": "${PROXMOX_API_TOKEN_SECRET}",
+    "node": "qa-proxmox",
+    "templateId": 9000
+  },
+  "test": {
+    "vmId": 600,
+    "vmIP": "10.10.20.100",
+    "network": {
+      "gateway": "10.10.20.1",
+      "subnet": "10.10.20.0/24",
+      "dns": "10.10.1.10"
+    },
+    "timeout": 900,
+    "retries": 5,
+    "cleanupOnFailure": true
+  },
+  "target": {
+    "sshUser": "${TARGET_SSH_USER}",
+    "sshPassword": "${TARGET_SSH_PASSWORD}",
+    "sudoPassword": "${TARGET_SUDO_PASSWORD}"
+  },
+  "services": {
+    "jenkins": {
+      "port": 8080,
+      "healthCheckPath": "/login",
+      "startupTime": 90
+    }
+  }
+}

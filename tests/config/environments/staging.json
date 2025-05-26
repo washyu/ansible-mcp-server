@@ -1,0 +1,39 @@
+{
+  "environment": "staging",
+  "description": "Staging environment for pre-production testing",
+  "mcp": {
+    "sseUrl": "https://staging-mcp.company.com:3001/sse",
+    "apiToken": "${MCP_API_TOKEN}"
+  },
+  "proxmox": {
+    "host": "${PROXMOX_HOST}",
+    "apiTokenId": "${PROXMOX_API_TOKEN_ID}",
+    "apiTokenSecret": "${PROXMOX_API_TOKEN_SECRET}",
+    "node": "staging-proxmox",
+    "templateId": 9001
+  },
+  "test": {
+    "vmId": 700,
+    "vmIP": "10.10.30.100",
+    "network": {
+      "gateway": "10.10.30.1",
+      "subnet": "10.10.30.0/24",
+      "dns": "10.10.1.10"
+    },
+    "timeout": 1200,
+    "retries": 3,
+    "cleanupOnFailure": false
+  },
+  "target": {
+    "sshUser": "${TARGET_SSH_USER}",
+    "sshPassword": "${TARGET_SSH_PASSWORD}",
+    "sudoPassword": "${TARGET_SUDO_PASSWORD}"
+  },
+  "services": {
+    "jenkins": {
+      "port": 8080,
+      "healthCheckPath": "/login",
+      "startupTime": 120
+    }
+  }
+}

@@ -1,17 +1,44 @@
 #!/usr/bin/env node
 // MCP Proxy Client - Bridges stdio (for Claude Desktop) to SSE (remote server)
-// Windows version with hardcoded configuration
 
 import { createInterface } from 'readline';
 import EventSource from 'eventsource';
 import http from 'http';
 import https from 'https';
 
-// Hardcoded configuration for Windows
-const SSE_URL = 'http://192.168.10.100:3001/sse';
-const API_TOKEN = '75bf9cbcf951ed970c96431f77985d7588d1229d5b3f29e0555a177f628f55d5';
+// Server configurations
+const MCP_SERVERS = {
+  production: {
+    url: 'http://192.168.10.100:3001/sse',
+    token: process.env.API_ACCESS_TOKEN || 'your-secure-token',
+    description: 'Production MCP Server'
+  },
+  dev: {
+    url: 'http://192.168.10.102:3001/sse',
+    token: process.env.API_ACCESS_TOKEN || 'your-secure-token',
+    description: 'Development MCP Server'
+  },
+  local: {
+    url: 'http://localhost:3001/sse',
+    token: process.env.API_ACCESS_TOKEN || 'your-secure-token',
+    description: 'Local MCP Server'
+  }
+};
 
-console.error('Using SSE URL:', SSE_URL);
+// Determine which server to use
+const serverName = process.env.MCP_SERVER || process.argv[2] || 'production';
+const serverConfig = MCP_SERVERS[serverName];
+
+if (!serverConfig) {
+  console.error(`Unknown MCP server: ${serverName}`);
+  console.error('Available servers:', Object.keys(MCP_SERVERS).join(', '));
+  process.exit(1);
+}
+
+const SSE_URL = process.env.MCP_SSE_URL || serverConfig.url;
+const API_TOKEN = serverConfig.token;
+
+console.error(`Connecting to ${serverConfig.description} at ${SSE_URL}`);
 
 let sessionId = null;
 let eventSource = null;
@@ -22,13 +49,41 @@ const rl = createInterface({
   terminal: false
 });
 
+// Switch to a different MCP server
+function switchServer(newServerName) {
+  const newConfig = MCP_SERVERS[newServerName];
+  if (!newConfig) {
+    console.error(`Unknown server: ${newServerName}. Available: ${Object.keys(MCP_SERVERS).join(', ')}`);
+    return false;
+  }
+  
+  console.error(`Switching to ${newConfig.description}...`);
+  
+  // Close current connection
+  if (eventSource) {
+    eventSource.close();
+  }
+  
+  // Update global variables
+  Object.assign(global, {
+    SSE_URL: newConfig.url,
+    API_TOKEN: newConfig.token
+  });
+  
+  sessionId = null;
+  connect();
+  return true;
+}
+
 // Connect to SSE server
 function connect() {
-  console.error('Connecting to SSE server:', SSE_URL);
+  const currentUrl = global.SSE_URL || SSE_URL;
+  const currentToken = global.API_TOKEN || API_TOKEN;
+  console.error('Connecting to SSE server:', currentUrl);
   
-  eventSource = new EventSource(SSE_URL, {
+  eventSource = new EventSource(currentUrl, {
     headers: {
-      'Authorization': `Bearer ${API_TOKEN}`
+      'Authorization': `Bearer ${currentToken}`
     }
   });
 
@@ -81,7 +136,9 @@ async function sendInput(data) {
     return;
   }
 
-  const url = new URL(`/sessions/${sessionId}/input`, SSE_URL);
+  const currentUrl = global.SSE_URL || SSE_URL;
+  const currentToken = global.API_TOKEN || API_TOKEN;
+  const url = new URL(`/sessions/${sessionId}/input`, currentUrl);
   const protocol = url.protocol === 'https:' ? https : http;
 
   return new Promise((resolve, reject) => {
@@ -91,8 +148,8 @@ async function sendInput(data) {
       path: url.pathname,
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain',
-        'Authorization': `Bearer ${API_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentToken}`,
         'Content-Length': Buffer.byteLength(data)
       }
     };
@@ -117,8 +174,38 @@ async function sendInput(data) {
 
 // Handle stdin from Claude Desktop
 rl.on('line', async (line) => {
-  console.error('Received from Claude:', line.substring(0, 100) + '...');
   try {
+    // Check for special proxy commands
+    if (line.startsWith('__MCP_PROXY_')) {
+      const command = line.trim();
+      if (command.startsWith('__MCP_PROXY_SWITCH_')) {
+        const serverName = command.replace('__MCP_PROXY_SWITCH_', '');
+        const success = switchServer(serverName);
+        const response = {
+          jsonrpc: '2.0',
+          result: {
+            switched: success,
+            server: serverName,
+            available: Object.keys(MCP_SERVERS)
+          },
+          id: 'proxy-switch'
+        };
+        process.stdout.write(JSON.stringify(response) + '\n');
+        return;
+      } else if (command === '__MCP_PROXY_LIST_SERVERS') {
+        const response = {
+          jsonrpc: '2.0',
+          result: {
+            servers: MCP_SERVERS,
+            current: serverName
+          },
+          id: 'proxy-list'
+        };
+        process.stdout.write(JSON.stringify(response) + '\n');
+        return;
+      }
+    }
+
     // Wait for session to be established
     let retries = 0;
     while (!sessionId && retries < 50) {
@@ -130,9 +217,7 @@ rl.on('line', async (line) => {
       throw new Error('Failed to establish session');
     }
 
-    console.error('Sending to server:', line.substring(0, 100) + '...');
     await sendInput(line);
-    console.error('Sent successfully');
   } catch (error) {
     console.error('Failed to send input:', error);
     const errorResponse = {
