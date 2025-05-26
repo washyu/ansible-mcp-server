@@ -108,7 +108,7 @@ variable "proxmox_api_token_secret" {
   sensitive   = true
 }
 
-resource "proxmox_vm_qemu" "${name}" {
+resource "proxmox_vm_qemu" "${name.replace(/-/g, '_')}" {
   name        = "${name}"
   target_node = "pve"
   vmid        = ${vmid}
@@ -143,7 +143,7 @@ resource "proxmox_vm_qemu" "${name}" {
 }
 
 output "${name}_ip" {
-  value = proxmox_vm_qemu.${name}.default_ipv4_address
+  value = proxmox_vm_qemu.${name.replace(/-/g, '_')}.default_ipv4_address
 }
 `;
 
