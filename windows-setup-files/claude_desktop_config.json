@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "ansible-mcp": {
+    "ansible-mcp-prod": {
       "command": "cmd",
       "args": ["/c", "C:\\Users\\washy\\.mcp-proxy\\mcp-proxy.bat"]
     }

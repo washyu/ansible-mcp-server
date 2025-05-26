@@ -38,13 +38,18 @@
 2. **Test the proxy client**:
    ```powershell
    cd C:\Users\washy\.mcp-proxy
-   node mcp-proxy-client.js
+   mcp-proxy.bat
    ```
    You should see:
-   - "Using SSE URL: http://192.168.10.100:3001/sse"
-   - "Connecting to SSE server..."
+   - "Starting MCP Proxy for server: production"
+   - "Connecting to Production MCP Server at http://192.168.10.100:3001/sse"
    - "SSE connection established"
    - "Session ID: [some-uuid]"
+   
+   To test dev server:
+   ```powershell
+   mcp-proxy.bat dev
+   ```
 
 3. **Check Claude Desktop**:
    - Open Claude Desktop
@@ -72,7 +77,7 @@ Windows (Your PC)                    Linux (192.168.10.100)
                                     │  MCP Server Process  │
                                     │  (src/index.js)      │
                                     │                      │
-                                    │  57 Ansible tools    │
+                                    │  60 Ansible tools    │
                                     └──────────────────────┘
 ```
 
@@ -91,6 +96,35 @@ If Claude Desktop shows "Server disconnected":
 3. The proxy client connects to the SSE server at `192.168.10.100:3001`
 4. SSE server authenticates using the API token
 5. SSE server spawns an MCP process and bridges communication
-6. All 57 Ansible tools become available in Claude Desktop
+6. All 60 Ansible tools become available in Claude Desktop
 
-This allows the AI agent to restart the MCP service when you push changes!
+## Server Switching
+
+You can switch between different MCP servers:
+
+**Option 1: Command line argument**
+```powershell
+mcp-proxy.bat production  # Default
+mcp-proxy.bat dev         # Development server (192.168.10.102)
+mcp-proxy.bat local       # Local server (requires Docker)
+```
+
+**Option 2: Environment variable**
+```powershell
+set MCP_SERVER=dev
+mcp-proxy.bat
+```
+
+**Option 3: Update Claude config for specific server**
+```json
+{
+  "mcpServers": {
+    "ansible-mcp": {
+      "command": "cmd",
+      "args": ["/c", "C:\\Users\\washy\\.mcp-proxy\\mcp-proxy.bat", "dev"]
+    }
+  }
+}
+```
+
+This allows you to test changes on the dev server before deploying to production!

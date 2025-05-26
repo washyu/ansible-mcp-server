@@ -20,7 +20,7 @@ if not defined MCP_SERVER (
     )
 )
 
-echo Starting MCP Proxy for server: %MCP_SERVER%
+REM echo Starting MCP Proxy for server: %MCP_SERVER%
 node "%~dp0mcp-proxy-client.js" %MCP_SERVER%
 goto :end
 

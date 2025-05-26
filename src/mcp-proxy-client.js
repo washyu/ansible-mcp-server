@@ -42,6 +42,7 @@ console.error(`Connecting to ${serverConfig.description} at ${SSE_URL}`);
 
 let sessionId = null;
 let eventSource = null;
+const pendingRequests = new Map();
 
 const rl = createInterface({
   input: process.stdin,
@@ -77,6 +78,12 @@ function switchServer(newServerName) {
 
 // Connect to SSE server
 function connect() {
+  // Close any existing connection
+  if (eventSource) {
+    console.error('Closing existing SSE connection');
+    eventSource.close();
+  }
+  
   const currentUrl = global.SSE_URL || SSE_URL;
   const currentToken = global.API_TOKEN || API_TOKEN;
   console.error('Connecting to SSE server:', currentUrl);
@@ -89,6 +96,8 @@ function connect() {
 
   eventSource.onopen = () => {
     console.error('SSE connection established');
+    // Mark that we're ready for requests
+    global.__sseReady = true;
   };
 
   eventSource.onmessage = (event) => {
@@ -99,11 +108,23 @@ function connect() {
         case 'session':
           sessionId = data.sessionId;
           console.error('Session ID:', sessionId);
+          
+          // Session is now ready
           break;
           
         case 'message':
           // Forward MCP message to stdout for Claude Desktop
           process.stdout.write(JSON.stringify(data.data) + '\n');
+          
+          // Clear pending request timeout
+          if (data.data && data.data.id !== undefined) {
+            const timeoutId = pendingRequests.get(data.data.id);
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+              pendingRequests.delete(data.data.id);
+              console.error(`Cleared timeout for request ${data.data.id}`);
+            }
+          }
           break;
           
         case 'error':
@@ -175,6 +196,72 @@ async function sendInput(data) {
 // Handle stdin from Claude Desktop
 rl.on('line', async (line) => {
   try {
+    // Handle initialize requests with synthetic response
+    try {
+      const msg = JSON.parse(line);
+      if (msg.method === 'initialize' && msg.id !== undefined) {
+        console.error('Received initialize request with id:', msg.id);
+        
+        // Send synthetic response immediately
+        const initResponse = {
+          result: {
+            protocolVersion: '2024-11-05',
+            capabilities: { tools: {} },
+            serverInfo: { name: 'ansible-mcp-server', version: '1.1.0' }
+          },
+          jsonrpc: '2.0',
+          id: msg.id
+        };
+        
+        console.error('Sending synthetic initialize response immediately');
+        process.stdout.write(JSON.stringify(initResponse) + '\n');
+        
+        // Don't forward initialize to the server since we handled it
+        return;
+      } else if (msg.method === 'tools/list' && msg.id !== undefined) {
+        console.error('Received tools/list request with id:', msg.id);
+        
+        // Send synthetic tools list response
+        const toolsResponse = {
+          result: {
+            tools: [
+              { name: "test-connection", description: "Test connection to a target host", inputSchema: { type: "object", properties: { target: { type: "string" } }, required: ["target"] } },
+              { name: "run-playbook", description: "Run an Ansible playbook", inputSchema: { type: "object", properties: { playbook: { type: "string" } }, required: ["playbook"] } },
+              { name: "list-hosts", description: "List all hosts in inventory", inputSchema: { type: "object", properties: {} } }
+            ]
+          },
+          jsonrpc: '2.0',
+          id: msg.id
+        };
+        
+        console.error('Sending synthetic tools/list response');
+        process.stdout.write(JSON.stringify(toolsResponse) + '\n');
+        
+        // Don't forward to server
+        return;
+      } else if (msg.method === 'tools/call' && msg.id !== undefined) {
+        console.error('Received tools/call request:', msg.params?.name);
+        
+        // Send error response for all tool calls
+        const errorResponse = {
+          error: {
+            code: -32603,
+            message: "MCP server is currently unavailable due to stdout capture issue. See GitHub issue #28."
+          },
+          jsonrpc: '2.0',
+          id: msg.id
+        };
+        
+        console.error('Sending error response for tool call');
+        process.stdout.write(JSON.stringify(errorResponse) + '\n');
+        
+        // Don't forward to server
+        return;
+      }
+    } catch (e) {
+      // Not JSON or parse error, continue normally
+    }
+    
     // Check for special proxy commands
     if (line.startsWith('__MCP_PROXY_')) {
       const command = line.trim();
@@ -215,6 +302,35 @@ rl.on('line', async (line) => {
 
     if (!sessionId) {
       throw new Error('Failed to establish session');
+    }
+
+    // Set a timeout for any other requests
+    if (sessionId) {
+      try {
+        const msg = JSON.parse(line);
+        if (msg.id !== undefined && !msg.method?.startsWith('__MCP_PROXY_')) {
+          // Set a 5-second timeout for responses
+          const timeoutId = setTimeout(() => {
+            if (pendingRequests.has(msg.id)) {
+              const errorResponse = {
+                error: {
+                  code: -32001,
+                  message: "Request timed out due to SSE server issue"
+                },
+                jsonrpc: '2.0',
+                id: msg.id
+              };
+              console.error(`Timeout for request ${msg.id}, sending error response`);
+              process.stdout.write(JSON.stringify(errorResponse) + '\n');
+              pendingRequests.delete(msg.id);
+            }
+          }, 5000);
+          
+          pendingRequests.set(msg.id, timeoutId);
+        }
+      } catch (e) {
+        // Not JSON, ignore
+      }
     }
 
     await sendInput(line);

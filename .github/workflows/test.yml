@@ -37,6 +37,20 @@ jobs:
       run: npm run test:integration
       continue-on-error: true
     
+    - name: Run SSE-MCP integration test
+      run: |
+        # Start SSE server in background
+        API_ACCESS_TOKEN=test-token-ci npm run start:sse &
+        SSE_PID=$!
+        # Wait for server to start
+        sleep 5
+        # Run integration test
+        API_ACCESS_TOKEN=test-token-ci node tests/integration/sse-mcp-integration-runner.cjs
+        # Kill SSE server
+        kill $SSE_PID || true
+      env:
+        API_ACCESS_TOKEN: test-token-ci
+    
     - name: Run tool tests
       run: npm run test:tools
       continue-on-error: true

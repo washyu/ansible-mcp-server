@@ -48,8 +48,31 @@ await createVM() → installJenkins() → verifyJenkins() → removeJenkins() �
 
 **When to Use**:
 - Testing MCP ↔ Proxmox API integration
-- Testing SSE ↔ MCP communication
-- Testing Ansible ↔ Target VM connectivity
+- SSE proxy ↔ MCP server communication
+- Critical protocol implementations
+
+#### SSE-MCP Response Capture Test
+**File**: `tests/integration/sse-mcp-integration-runner.cjs`
+
+**Purpose**: Ensures the SSE proxy properly captures and forwards MCP server responses, preventing timeout issues.
+
+**What it validates**:
+1. SSE server accepts connections with proper authentication
+2. MCP server processes spawn correctly
+3. JSON messages are properly parsed and forwarded
+4. Responses arrive within acceptable time limits (no timeout)
+5. Complex JSON structures are handled correctly
+
+**Running locally**:
+```bash
+# Start SSE server
+npm run start:sse
+
+# In another terminal, run the test
+node tests/integration/sse-mcp-integration-runner.cjs
+```
+
+**CI/CD**: Runs automatically on every push/PR to prevent regression of the SSE timeout bug.
 
 ### 3. Unit Tests (Minimal)
 
