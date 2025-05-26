@@ -38,14 +38,38 @@ A Model Context Protocol (MCP) server that enables AI assistants to manage infra
 # Clone the repository
 git clone https://github.com/yourusername/ansible-mcp-server.git
 cd ansible-mcp-server
-
+```
+```bash
 # Install dependencies
 npm install
-
+```
+```
 # Copy and configure environment
 cp .env.example .env
+```
+```
 # Edit .env with your settings
 
+# --- Proxmox Configuration ---
+PROXMOX_HOST="YOUR_PROXMOX_HOST"        # Proxmox server address or IP
+PROXMOX_USER="root@pam"                 # Proxmox login username
+PROXMOX_PASSWORD="your-proxmox-password" # Proxmox login password
+PROXMOX_NODE="pve"                      # Proxmox node name
+
+# --- Network Configuration ---
+DEFAULT_GATEWAY="YOUR_GATEWAY_IP"       # Default gateway for VMs
+DEFAULT_NAMESERVER="8.8.8.8"            # DNS server for VMs
+DEFAULT_NETWORK_CIDR=24                 # Network mask in CIDR notation
+
+# --- SSE Server Configuration ---
+SSE_PORT=3001                           # Port for SSE server (for Windows clients)
+API_ACCESS_TOKEN="your-secure-token"    # API token for authentication
+
+# --- MCP Configuration ---
+MCP_USER="mcp"                          # Username for MCP
+MCP_HOME="/home/mcp"                    # Home directory for MCP user
+```
+```
 # Run the server
 npm start
 ```
