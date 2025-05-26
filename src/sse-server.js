@@ -55,7 +55,10 @@ app.get('/sse', authenticate, (req, res) => {
     // Ensure PATH includes common binary locations
     PATH: `/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ''}`,
     // Ensure we can find Python for Ansible
-    PYTHONPATH: '/usr/local/lib/python3.10/dist-packages'
+    PYTHONPATH: '/usr/local/lib/python3.10/dist-packages',
+    // Disable buffering to ensure real-time output
+    NODE_NO_READLINE: '1',
+    PYTHONUNBUFFERED: '1'
   };
   
   const mcp = spawn('node', ['src/index.js'], {
@@ -78,21 +81,50 @@ app.get('/sse', authenticate, (req, res) => {
   // Handle MCP stdout
   mcp.stdout.on('data', (data) => {
     const chunk = data.toString();
-    console.log(`MCP stdout [${sessionId}]:`, chunk);
+    console.log(`MCP stdout [${sessionId}]:`, JSON.stringify(chunk));
     session.buffer += chunk;
     
-    // Parse complete JSON messages
-    const lines = session.buffer.split('\n');
-    session.buffer = lines.pop() || '';
-    
-    for (const line of lines) {
-      if (line.trim()) {
+    // Try to parse complete JSON messages
+    while (session.buffer.length > 0) {
+      // Look for complete JSON objects
+      let parsed = false;
+      
+      // Try to find a complete JSON message
+      for (let i = 1; i <= session.buffer.length; i++) {
+        const testStr = session.buffer.substring(0, i);
         try {
-          const message = JSON.parse(line);
-          console.log(`Sending to client [${sessionId}]:`, message);
+          const message = JSON.parse(testStr);
+          // Successfully parsed a complete JSON message
+          console.log(`Parsed MCP message [${sessionId}]:`, message);
           res.write(`data: ${JSON.stringify({ type: 'message', data: message })}\n\n`);
+          session.buffer = session.buffer.substring(i);
+          parsed = true;
+          break;
         } catch (e) {
-          console.error('Failed to parse MCP output:', e, 'Line:', line);
+          // Not a complete JSON yet, keep trying
+        }
+      }
+      
+      // If we couldn't parse anything, wait for more data
+      if (!parsed) {
+        break;
+      }
+    }
+    
+    // Also try line-based parsing as fallback
+    if (session.buffer.includes('\n')) {
+      const lines = session.buffer.split('\n');
+      session.buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const message = JSON.parse(line);
+            console.log(`Parsed line-based message [${sessionId}]:`, message);
+            res.write(`data: ${JSON.stringify({ type: 'message', data: message })}\n\n`);
+          } catch (e) {
+            console.error('Failed to parse line:', e.message, 'Line:', line);
+          }
         }
       }
     }
@@ -129,15 +161,17 @@ app.get('/sse', authenticate, (req, res) => {
 });
 
 // POST endpoint to send data to MCP
-app.post('/sessions/:sessionId/input', authenticate, express.text({ type: '*/*' }), (req, res) => {
+app.post('/sessions/:sessionId/input', authenticate, (req, res) => {
   const session = mcpSessions.get(req.params.sessionId);
   if (!session) {
     return res.status(404).json({ error: 'Session not found' });
   }
 
   try {
-    console.log(`Received input for session ${req.params.sessionId}:`, req.body);
-    session.process.stdin.write(req.body + '\n');
+    // Convert the request body to JSON string if it's an object
+    const jsonString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    console.log(`Received input for session ${req.params.sessionId}:`, jsonString);
+    session.process.stdin.write(jsonString + '\n');
     res.json({ success: true });
   } catch (error) {
     console.error(`Error writing to stdin [${req.params.sessionId}]:`, error);
