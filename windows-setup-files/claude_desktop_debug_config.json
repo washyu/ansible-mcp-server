@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ansible-mcp-debug": {
+      "command": "C:\\Users\\washy\\.mcp-proxy\\test-mcp-proxy.bat",
+      "args": []
+    }
+  }
+}

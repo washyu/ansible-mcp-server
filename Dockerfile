@@ -38,8 +38,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ansible
-RUN pip3 install --no-cache-dir ansible
+# Install Ansible and required Python libraries
+RUN pip3 install --no-cache-dir ansible proxmoxer requests
 
 # Install Terraform
 RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \

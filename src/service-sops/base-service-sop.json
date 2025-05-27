@@ -1,0 +1,132 @@
+{
+  "base_service_installation": {
+    "description": "Common steps for any service installation",
+    "pre_checks": {
+      "duplicate_detection": {
+        "description": "Check if service already exists",
+        "steps": [
+          "Search inventory by service name",
+          "Check common ports for service",
+          "Query context for known instances"
+        ]
+      },
+      "resource_validation": {
+        "description": "Ensure resources meet service requirements",
+        "steps": [
+          "Compare required vs available resources",
+          "Check node capacity",
+          "Validate network availability"
+        ]
+      }
+    },
+    "duplicate_handling_options": {
+      "replace": {
+        "description": "Delete existing and create new",
+        "common_steps": [
+          "Document current configuration",
+          "Backup persistent data if applicable",
+          "Stop service gracefully",
+          "Delete VM with confirmation",
+          "Create new VM with specifications",
+          "Install service fresh",
+          "Restore data if applicable"
+        ]
+      },
+      "update": {
+        "description": "Keep VM, update service",
+        "common_steps": [
+          "Connect to existing VM",
+          "Check current service version",
+          "Backup configuration",
+          "Update service",
+          "Apply new configuration",
+          "Restart if needed",
+          "Verify functionality"
+        ]
+      },
+      "new_instance": {
+        "description": "Add additional instance",
+        "common_steps": [
+          "Generate unique instance name",
+          "Allocate different port if needed",
+          "Create new VM",
+          "Install service",
+          "Configure for multi-instance setup",
+          "Update load balancer if applicable"
+        ]
+      },
+      "use_existing": {
+        "description": "No changes needed",
+        "common_steps": [
+          "Verify service health",
+          "Test connectivity",
+          "Document endpoint",
+          "Report to user"
+        ]
+      }
+    },
+    "vm_creation_steps": {
+      "description": "Standard VM creation for services",
+      "steps": [
+        "Check inventory freshness",
+        "Find optimal node placement",
+        "Allocate VM ID",
+        "Clone from template",
+        "Configure network",
+        "Set up SSH access",
+        "Update inventory"
+      ]
+    },
+    "post_install_steps": {
+      "description": "Common post-installation tasks",
+      "steps": [
+        "Configure service for auto-start",
+        "Set up monitoring",
+        "Configure backups if needed",
+        "Update service catalog",
+        "Document access credentials",
+        "Test service functionality",
+        "Update MCP context with service details",
+        "Store service credentials in vault"
+      ]
+    },
+    "context_updates": {
+      "description": "Updates to MCP context after successful operations",
+      "vm_creation": {
+        "infrastructure_state.vms.{vmid}": {
+          "name": "string",
+          "ip": "string",
+          "purpose": "string",
+          "owner": "string",
+          "credentials": {
+            "admin_user": "ansible-admin",
+            "admin_password_vault": "ansible-vault encrypted",
+            "ssh_key": "mcp_key_name"
+          },
+          "created": "ISO 8601 timestamp",
+          "last_verified": "ISO 8601 timestamp"
+        }
+      },
+      "service_installation": {
+        "services.{service_name}": {
+          "vm_id": "string",
+          "vm_ip": "string",
+          "service_port": "integer",
+          "api_endpoint": "string",
+          "admin_user": "string",
+          "admin_password_vault": "ansible-vault encrypted",
+          "configuration": "service-specific config",
+          "installed_date": "ISO 8601 timestamp",
+          "version": "string",
+          "health_check_endpoint": "string"
+        }
+      }
+    },
+    "health_checks": {
+      "network": "Test port accessibility",
+      "service": "Verify service is running",
+      "api": "Test API endpoints if applicable",
+      "performance": "Check resource utilization"
+    }
+  }
+}

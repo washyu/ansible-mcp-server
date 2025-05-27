@@ -1,0 +1,146 @@
+{
+  "nextcloud": {
+    "extends": "base_service_installation",
+    "service_name": "Nextcloud",
+    "description": "Self-hosted cloud storage and collaboration platform",
+    "requirements": {
+      "min_cores": 2,
+      "min_memory_gb": 4,
+      "recommended_cores": 4,
+      "recommended_memory_gb": 8,
+      "disk_space_gb": 100,
+      "additional": "Grows with user data"
+    },
+    "detection": {
+      "methods": [
+        "VM name contains 'nextcloud'",
+        "Port 80/443 with Nextcloud headers",
+        "Database named 'nextcloud'"
+      ],
+      "api_check": "GET http://{ip}/status.php"
+    },
+    "installation": {
+      "install_method": "docker_compose",
+      "prerequisites": [
+        "Docker and Docker Compose",
+        "Database (MariaDB/PostgreSQL)",
+        "Redis for caching"
+      ],
+      "compose_template": {
+        "services": {
+          "nextcloud": {
+            "image": "nextcloud:latest",
+            "ports": ["8080:80"],
+            "volumes": [
+              "nextcloud_data:/var/www/html",
+              "nextcloud_config:/var/www/html/config"
+            ],
+            "environment": {
+              "POSTGRES_DB": "nextcloud",
+              "POSTGRES_USER": "nextcloud",
+              "POSTGRES_PASSWORD": "${DB_PASSWORD}",
+              "NEXTCLOUD_ADMIN_USER": "${ADMIN_USER}",
+              "NEXTCLOUD_ADMIN_PASSWORD": "${ADMIN_PASSWORD}",
+              "NEXTCLOUD_TRUSTED_DOMAINS": "${DOMAIN}"
+            }
+          },
+          "db": {
+            "image": "postgres:14",
+            "volumes": ["db_data:/var/lib/postgresql/data"],
+            "environment": {
+              "POSTGRES_DB": "nextcloud",
+              "POSTGRES_USER": "nextcloud",
+              "POSTGRES_PASSWORD": "${DB_PASSWORD}"
+            }
+          },
+          "redis": {
+            "image": "redis:alpine"
+          }
+        }
+      }
+    },
+    "configuration": {
+      "essential_settings": {
+        "trusted_domains": "Array of allowed access domains",
+        "overwrite.cli.url": "https://your-domain.com",
+        "default_phone_region": "US",
+        "redis_config": {
+          "host": "redis",
+          "port": 6379
+        }
+      },
+      "performance_tuning": [
+        "Enable Redis caching",
+        "Configure APCu for local caching",
+        "Set up cron jobs for background tasks",
+        "Configure PHP memory limit"
+      ]
+    },
+    "app_management": {
+      "recommended_apps": [
+        "Calendar",
+        "Contacts", 
+        "Mail",
+        "Talk (video chat)",
+        "Office (Collabora/OnlyOffice)",
+        "Photos",
+        "Notes"
+      ],
+      "commands": {
+        "list": "docker exec nextcloud php occ app:list",
+        "enable": "docker exec nextcloud php occ app:enable {app}",
+        "disable": "docker exec nextcloud php occ app:disable {app}"
+      }
+    },
+    "update_specific": {
+      "app_update": {
+        "prompt": "Update Nextcloud apps or core?",
+        "steps": [
+          "Backup data and database",
+          "Put in maintenance mode",
+          "Update via web UI or occ",
+          "Run database migrations",
+          "Disable maintenance mode"
+        ]
+      },
+      "storage_expansion": {
+        "steps": [
+          "Add new storage volume",
+          "Mount to container",
+          "Configure external storage app",
+          "Set user quotas if needed"
+        ]
+      }
+    },
+    "testing": {
+      "endpoints": [
+        "GET /status.php - System status",
+        "GET /ocs/v2.php/apps/serverinfo/api/v1/info - Server info",
+        "WebDAV at /remote.php/dav/"
+      ],
+      "functionality": [
+        "User login",
+        "File upload/download",
+        "Sharing functionality",
+        "App functionality"
+      ]
+    },
+    "backup_strategy": {
+      "critical_paths": [
+        "/var/www/html/data - User files",
+        "/var/www/html/config - Configuration",
+        "Database dump",
+        "Apps data"
+      ],
+      "backup_command": "docker exec nextcloud php occ maintenance:mode --on && backup_script.sh"
+    },
+    "troubleshooting": {
+      "common_issues": {
+        "permission_errors": "chown -R www-data:www-data /var/www/html",
+        "trusted_domain_error": "Add domain to config.php trusted_domains array",
+        "maintenance_mode_stuck": "php occ maintenance:mode --off",
+        "large_file_uploads": "Adjust PHP and nginx upload limits"
+      }
+    }
+  }
+}

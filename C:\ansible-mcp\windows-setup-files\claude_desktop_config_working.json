@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "ansible-mcp-v2": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\washy\\.mcp-proxy\\mcp-proxy-client.js",
+        "production"
+      ],
+      "env": {
+        "API_ACCESS_TOKEN": "75bf9cbcf951ed970c96431f77985d7588d1229d5b3f29e0555a177f628f55d5",
+        "NODE_OPTIONS": "--max-old-space-size=4096"
+      }
+    }
+  }
+}

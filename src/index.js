@@ -30,8 +30,30 @@ const server = new Server(
   }
 );
 
+// Load default context
+async function loadDefaultContext() {
+  try {
+    const defaultContextPath = path.join(__dirname, 'default-context.json');
+    const contextData = await fs.readFile(defaultContextPath, 'utf8');
+    const defaultContext = JSON.parse(contextData);
+    
+    // Store default context in tool registry
+    await toolRegistry.setContext('standard_operating_procedures', defaultContext.standard_operating_procedures);
+    await toolRegistry.setContext('best_practices', defaultContext.best_practices);
+    await toolRegistry.setContext('error_recovery', defaultContext.error_recovery);
+    await toolRegistry.setContext('validation_checks', defaultContext.validation_checks);
+    
+    console.error('Loaded default context with SOPs for common operations');
+  } catch (error) {
+    console.error('Warning: Could not load default context:', error.message);
+  }
+}
+
 // Initialize tool registry with previously loaded services
 async function initializeTools() {
+  // Load default context first
+  await loadDefaultContext();
+  
   const loadedServices = toolRegistry.getContext('loadedServices') || [];
   for (const service of loadedServices) {
     await loadServiceTools(service);

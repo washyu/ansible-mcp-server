@@ -1,0 +1,101 @@
+{
+  "docker": {
+    "extends": "base_service_installation",
+    "service_name": "Docker",
+    "description": "Container runtime and orchestration",
+    "requirements": {
+      "min_cores": 2,
+      "min_memory_gb": 2,
+      "recommended_cores": 4,
+      "recommended_memory_gb": 4,
+      "disk_space_gb": 20,
+      "additional": "More for container images"
+    },
+    "detection": {
+      "methods": [
+        "docker command exists",
+        "Docker socket at /var/run/docker.sock",
+        "dockerd process running"
+      ],
+      "version_check": "docker version"
+    },
+    "installation": {
+      "install_method": "official_script",
+      "commands": [
+        "curl -fsSL https://get.docker.com | sh",
+        "usermod -aG docker ${USER}",
+        "systemctl enable docker",
+        "systemctl start docker"
+      ],
+      "compose_install": [
+        "curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose",
+        "chmod +x /usr/local/bin/docker-compose"
+      ]
+    },
+    "configuration": {
+      "daemon_json": {
+        "path": "/etc/docker/daemon.json",
+        "recommended": {
+          "log-driver": "json-file",
+          "log-opts": {
+            "max-size": "10m",
+            "max-file": "3"
+          },
+          "default-address-pools": [
+            {
+              "base": "172.80.0.0/16",
+              "size": 24
+            }
+          ]
+        }
+      },
+      "storage_driver": "overlay2",
+      "registry_mirrors": []
+    },
+    "update_specific": {
+      "version_update": {
+        "steps": [
+          "Check current version",
+          "Re-run install script",
+          "Restart Docker daemon",
+          "Verify containers still running"
+        ]
+      },
+      "cleanup": {
+        "commands": {
+          "prune_all": "docker system prune -a",
+          "remove_unused_images": "docker image prune -a",
+          "remove_stopped_containers": "docker container prune",
+          "remove_unused_volumes": "docker volume prune"
+        }
+      }
+    },
+    "testing": {
+      "commands": [
+        "docker run hello-world",
+        "docker ps",
+        "docker info",
+        "docker-compose version"
+      ]
+    },
+    "common_services": {
+      "description": "Commonly deployed via Docker",
+      "examples": [
+        "Portainer (Docker management UI)",
+        "Traefik (Reverse proxy)",
+        "PostgreSQL/MySQL (Databases)",
+        "Redis (Cache)",
+        "Nginx (Web server)",
+        "Grafana/Prometheus (Monitoring)"
+      ]
+    },
+    "troubleshooting": {
+      "common_issues": {
+        "permission_denied": "Add user to docker group and re-login",
+        "cannot_connect_to_daemon": "Check if Docker service is running",
+        "disk_space_full": "Run docker system prune",
+        "container_network_issues": "Check docker network ls and firewall rules"
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "lastUpdated": "2025-05-27T02:52:15.156Z",
+  "vms": {
+    "error": "Proxmox API request timeout"
+  },
+  "templates": {
+    "error": "Failed to parse Proxmox response: Unexpected end of JSON input"
+  },
+  "isos": {
+    "error": "Failed to parse Proxmox response: Unexpected end of JSON input"
+  },
+  "storage": {
+    "error": "Failed to parse Proxmox response: Unexpected end of JSON input"
+  },
+  "nodes": {
+    "error": "Failed to parse Proxmox response: Unexpected end of JSON input"
+  },
+  "networks": {
+    "error": "Failed to parse Proxmox response: Unexpected end of JSON input"
+  }
+}

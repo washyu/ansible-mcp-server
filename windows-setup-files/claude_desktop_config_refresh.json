@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "ansible-mcp-refreshed": {
+      "command": "node",
+      "args": [
+        "C:\\ansible-mcp\\mcp-proxy-client.js",
+        "http://10.0.30.50:3001"
+      ],
+      "env": {
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}

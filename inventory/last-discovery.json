@@ -1,0 +1,12 @@
+{
+  "lastUpdated": "2025-05-27T02:52:15.156Z",
+  "stalenessHours": 10,
+  "resourceCounts": {
+    "vms": 0,
+    "templates": 0,
+    "isos": 0,
+    "storage": 0,
+    "nodes": 0,
+    "networks": 0
+  }
+}

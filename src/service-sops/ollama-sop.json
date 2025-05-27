@@ -1,0 +1,91 @@
+{
+  "ollama": {
+    "extends": "base_service_installation",
+    "service_name": "Ollama",
+    "description": "LLM inference server",
+    "requirements": {
+      "min_cores": 4,
+      "min_memory_gb": 8,
+      "recommended_cores": 8,
+      "recommended_memory_gb": 16,
+      "gpu_recommended": true,
+      "disk_space_gb": 100
+    },
+    "detection": {
+      "methods": [
+        "VM name contains 'ollama'",
+        "Port 11434 is open",
+        "Process 'ollama' is running"
+      ],
+      "api_check": "GET http://{ip}:11434/api/tags"
+    },
+    "installation": {
+      "install_method": "official_script",
+      "commands": [
+        "curl -fsSL https://ollama.ai/install.sh | sh"
+      ],
+      "systemd_service": "ollama",
+      "default_port": 11434,
+      "data_directory": "/usr/share/ollama/.ollama"
+    },
+    "configuration": {
+      "environment_variables": {
+        "OLLAMA_HOST": "0.0.0.0:11434",
+        "OLLAMA_MODELS": "/usr/share/ollama/.ollama/models",
+        "OLLAMA_KEEP_ALIVE": "5m"
+      },
+      "custom_port_setup": "systemctl edit ollama → Environment=\"OLLAMA_HOST=0.0.0.0:{port}\""
+    },
+    "model_management": {
+      "default_models": ["llama2:7b", "codellama", "mistral"],
+      "commands": {
+        "list": "ollama list",
+        "pull": "ollama pull {model}",
+        "remove": "ollama rm {model}",
+        "show": "ollama show {model}"
+      },
+      "popular_models": {
+        "small": ["tinyllama", "phi", "orca-mini"],
+        "medium": ["llama2:7b", "mistral", "neural-chat"],
+        "large": ["llama2:13b", "llama2:70b", "mixtral"],
+        "code": ["codellama", "codegemma", "deepseek-coder"],
+        "multimodal": ["llava", "bakllava"]
+      }
+    },
+    "update_specific": {
+      "model_update": {
+        "prompt": "Which models would you like to add/remove?",
+        "steps": [
+          "List current models",
+          "Pull requested new models",
+          "Remove unwanted models",
+          "Verify model availability"
+        ]
+      },
+      "version_update": {
+        "steps": [
+          "Check current version: ollama version",
+          "Re-run install script for update",
+          "Restart service",
+          "Verify models still accessible"
+        ]
+      }
+    },
+    "testing": {
+      "api_endpoints": [
+        "GET /api/tags - List models",
+        "POST /api/generate - Generate text",
+        "POST /api/chat - Chat completion"
+      ],
+      "test_command": "curl -X POST http://localhost:11434/api/generate -d '{\"model\": \"llama2\", \"prompt\": \"Hello\", \"stream\": false}'"
+    },
+    "troubleshooting": {
+      "common_issues": {
+        "gpu_not_detected": "Check GPU drivers and CUDA/ROCm installation",
+        "model_download_fails": "Check disk space and internet connectivity",
+        "high_memory_usage": "Normal for large models, consider OLLAMA_MAX_LOADED_MODELS=1",
+        "port_conflict": "Change port via OLLAMA_HOST environment variable"
+      }
+    }
+  }
+}

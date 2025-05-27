@@ -1,0 +1,950 @@
+{
+  "standard_operating_procedures": {
+    "vm_operations": {
+      "create_vm": {
+        "description": "Steps to create a new VM with resource validation",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Check inventory freshness",
+            "command": "proxmox-inventory status",
+            "validation": "Ensure inventory is less than 10 hours old"
+          },
+          {
+            "step": 2,
+            "action": "Refresh inventory if stale",
+            "command": "proxmox-inventory refresh",
+            "validation": "Wait for refresh to complete"
+          },
+          {
+            "step": 3,
+            "action": "Check resource availability",
+            "command": "check-node-capacity",
+            "validation": "Ensure sufficient resources for requested VM",
+            "resource_checks": {
+              "cpu": "requested_cores <= available_cores",
+              "memory": "requested_memory <= available_memory",
+              "storage": "requested_disk <= available_storage",
+              "vm_slots": "current_vms < max_vms"
+            }
+          },
+          {
+            "step": 4,
+            "action": "Select optimal node",
+            "command": "find-best-node-for-vm",
+            "criteria": [
+              "Has required resources",
+              "Best resource utilization balance",
+              "Matches affinity rules if any"
+            ]
+          },
+          {
+            "step": 5,
+            "action": "List available templates",
+            "command": "Check inventory for templates",
+            "validation": "Ensure required template exists"
+          },
+          {
+            "step": 6,
+            "action": "Determine available VM ID",
+            "command": "Check existing VM IDs in inventory",
+            "validation": "Choose unused ID between 100-999"
+          },
+          {
+            "step": 7,
+            "action": "Create VM using clone template",
+            "command": "Use clone-vm-template.yml with newid parameter",
+            "validation": "Verify VM created successfully"
+          },
+          {
+            "step": 8,
+            "action": "Update inventory and resource tracking",
+            "command": "proxmox-inventory refresh categories=['vms','nodes']",
+            "validation": "Confirm new VM appears and resources updated"
+          },
+          {
+            "step": 9,
+            "action": "Configure SSH access",
+            "command": "Add MCP SSH key to VM",
+            "validation": "Test SSH connectivity"
+          },
+          {
+            "step": 10,
+            "action": "Create ansible-admin account",
+            "commands": [
+              "Create ansible-admin user with sudo privileges",
+              "Add MCP SSH keys to ansible-admin",
+              "Generate secure password and store in vault",
+              "Test ansible-admin SSH access"
+            ],
+            "validation": "ssh ansible-admin@{vm_ip} 'sudo whoami' returns 'root'"
+          },
+          {
+            "step": 11,
+            "action": "Update MCP context",
+            "updates": {
+              "infrastructure_state.vms.{vmid}": {
+                "name": "vm_name",
+                "ip": "vm_ip",
+                "purpose": "vm_purpose",
+                "credentials": {
+                  "admin_user": "ansible-admin",
+                  "admin_password_vault": "vault_key",
+                  "ssh_key": "mcp_key_name"
+                },
+                "created": "timestamp",
+                "last_verified": "timestamp"
+              }
+            },
+            "validation": "Context successfully updated"
+          }
+        ],
+        "common_issues": {
+          "vm_exists_error": "Use 'newid' parameter, not 'vmid' for target when cloning",
+          "ssh_access_denied": "Ensure template has SSH keys or use cloud-init sshkeys parameter",
+          "network_unreachable": "Verify IP address is available and network bridge is correct"
+        }
+      },
+      "install_service": {
+        "description": "Steps to install a service on a VM",
+        "prerequisite_checks": [
+          "Check if service already exists",
+          "Verify VM exists and is running",
+          "Ensure SSH access is working",
+          "Check VM has sufficient resources"
+        ],
+        "duplicate_service_handling": {
+          "detection": "Search inventory for existing service instances",
+          "user_options": {
+            "replace": {
+              "description": "Delete existing VM and create new one",
+              "actions": ["backup_data", "delete_vm", "create_new_vm", "restore_data"],
+              "when": "Existing service is broken or outdated"
+            },
+            "update": {
+              "description": "Keep VM, update service configuration",
+              "actions": ["connect_to_vm", "update_service", "reload_config"],
+              "when": "VM is healthy, just needs reconfiguration"
+            },
+            "new_instance": {
+              "description": "Create additional instance",
+              "actions": ["create_vm_with_suffix", "configure_load_balancing"],
+              "when": "Scaling out or testing new version"
+            },
+            "use_existing": {
+              "description": "Use existing service as-is",
+              "actions": ["verify_service_health", "report_endpoint"],
+              "when": "Service already meets requirements"
+            },
+            "cancel": {
+              "description": "Cancel operation",
+              "actions": ["log_cancellation", "cleanup"],
+              "when": "User decides not to proceed"
+            }
+          },
+          "decision_factors": [
+            "Current service health status",
+            "Version compatibility",
+            "Resource utilization",
+            "Data persistence requirements",
+            "Downtime tolerance"
+          ]
+        },
+        "steps": [
+          {
+            "step": 1,
+            "action": "Create inventory entry for target VM",
+            "validation": "Test ansible ping to VM"
+          },
+          {
+            "step": 2,
+            "action": "Use service-specific install template",
+            "validation": "Verify template exists in /playbooks/templates/"
+          },
+          {
+            "step": 3,
+            "action": "Run installation playbook",
+            "validation": "Check for successful completion"
+          },
+          {
+            "step": 4,
+            "action": "Verify service is running",
+            "validation": "Test service endpoint/API"
+          },
+          {
+            "step": 5,
+            "action": "Update service catalog",
+            "validation": "Service appears in MCP service inventory"
+          }
+        ]
+      },
+      "delete_vm": {
+        "description": "Steps to safely delete a VM",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Verify VM exists",
+            "command": "Check inventory for VM ID",
+            "validation": "Confirm VM ID and name match"
+          },
+          {
+            "step": 2,
+            "action": "Check for dependencies",
+            "validation": "Ensure no other services depend on this VM"
+          },
+          {
+            "step": 3,
+            "action": "Backup important data",
+            "validation": "Confirm backup completed if needed"
+          },
+          {
+            "step": 4,
+            "action": "Stop VM",
+            "command": "proxmox_kvm state=stopped",
+            "validation": "VM status is stopped"
+          },
+          {
+            "step": 5,
+            "action": "Delete VM",
+            "command": "proxmox_kvm state=absent",
+            "validation": "VM no longer exists"
+          },
+          {
+            "step": 6,
+            "action": "Update inventory",
+            "command": "proxmox-inventory refresh",
+            "validation": "VM removed from inventory"
+          }
+        ]
+      }
+    },
+    "service_operations": {
+      "description": "Service-specific operations are now modular. Use 'get-service-sop' tool.",
+      "available_services": ["ollama", "nextcloud", "docker"],
+      "usage": "get-service-sop serviceName='ollama' section='installation'",
+      "legacy_ollama": {
+        "note": "Moved to /src/service-sops/ollama-sop.json",
+        "install": {
+          "description": "Install Ollama LLM service",
+          "requirements": {
+            "min_cores": 4,
+            "min_memory_gb": 8,
+            "recommended_cores": 8,
+            "recommended_memory_gb": 16,
+            "gpu_recommended": true
+          },
+          "duplicate_handling": {
+            "detection_method": "Search for VMs with 'ollama' in name or port 11434 open",
+            "prompt_template": "Found existing Ollama server:\n- VM: {vm_name} (ID: {vm_id})\n- IP: {ip_address}\n- Status: {status}\n- Models: {installed_models}\n- Resources: {cores} cores, {memory}GB RAM\n\nHow would you like to proceed?",
+            "options": {
+              "replace": {
+                "prompt": "Replace existing Ollama server (requires restart)",
+                "workflow": [
+                  "List current models for reference",
+                  "Stop existing Ollama service",
+                  "Delete VM after confirmation",
+                  "Create new VM with same or different specs",
+                  "Install Ollama fresh",
+                  "Pull requested models"
+                ]
+              },
+              "update_models": {
+                "prompt": "Keep server, just update models",
+                "workflow": [
+                  "Connect to existing VM",
+                  "List current models",
+                  "Pull new models requested",
+                  "Remove unwanted models if specified",
+                  "Verify model availability"
+                ]
+              },
+              "add_instance": {
+                "prompt": "Add another Ollama instance (for load balancing)",
+                "workflow": [
+                  "Create new VM with suffix (ollama-2, ollama-3, etc.)",
+                  "Install Ollama",
+                  "Configure different port if needed",
+                  "Set up load balancer configuration"
+                ]
+              },
+              "use_existing": {
+                "prompt": "Use existing Ollama server as-is",
+                "workflow": [
+                  "Test Ollama API endpoint",
+                  "List available models",
+                  "Report endpoint to user",
+                  "No changes made"
+                ]
+              },
+              "upgrade": {
+                "prompt": "Upgrade Ollama to latest version",
+                "workflow": [
+                  "Check current Ollama version",
+                  "Backup model data",
+                  "Update Ollama binary",
+                  "Restart service",
+                  "Verify models still accessible"
+                ]
+              }
+            }
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "Create VM with sufficient resources",
+              "validation": "VM has at least minimum requirements"
+            },
+            {
+              "step": 2,
+              "action": "Use install-ollama-template.yml",
+              "validation": "Ollama service running on port 11434"
+            },
+            {
+              "step": 3,
+              "action": "Pull default models",
+              "models": ["llama2:7b", "mistral", "codellama"],
+              "validation": "Models downloaded successfully"
+            },
+            {
+              "step": 4,
+              "action": "Test API endpoint",
+              "validation": "GET http://vm-ip:11434/api/tags returns models"
+            }
+          ]
+        }
+      },
+      "docker": {
+        "install": {
+          "description": "Install Docker on a VM",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Update package manager",
+              "validation": "Package lists updated"
+            },
+            {
+              "step": 2,
+              "action": "Install Docker via official script",
+              "command": "curl -fsSL https://get.docker.com | sh",
+              "validation": "Docker service running"
+            },
+            {
+              "step": 3,
+              "action": "Add user to docker group",
+              "validation": "User can run docker without sudo"
+            },
+            {
+              "step": 4,
+              "action": "Install docker-compose",
+              "validation": "docker-compose command available"
+            }
+          ]
+        }
+      }
+    },
+    "inventory_operations": {
+      "refresh": {
+        "description": "Refresh infrastructure inventory",
+        "trigger_conditions": [
+          "Inventory older than 10 hours",
+          "Before any infrastructure changes",
+          "After any VM creation/deletion",
+          "When requested by user"
+        ],
+        "steps": [
+          {
+            "step": 1,
+            "action": "Check current inventory status",
+            "command": "inventory-status detailed=true"
+          },
+          {
+            "step": 2,
+            "action": "Set refresh lock",
+            "validation": "Prevent concurrent refreshes"
+          },
+          {
+            "step": 3,
+            "action": "Refresh all categories",
+            "command": "proxmox-inventory refresh",
+            "validation": "All categories updated"
+          },
+          {
+            "step": 4,
+            "action": "Validate inventory completeness",
+            "validation": "Check for expected resources"
+          }
+        ]
+      },
+      "inventory_scan_with_validation": {
+        "description": "Scan inventory and detect deviations from expected state",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Load current context inventory",
+            "command": "get-mcp-context key='infrastructure_state'",
+            "validation": "Context loaded successfully"
+          },
+          {
+            "step": 2,
+            "action": "Refresh live inventory",
+            "command": "proxmox-inventory refresh force=true",
+            "validation": "Fresh inventory obtained"
+          },
+          {
+            "step": 3,
+            "action": "Compare context vs live inventory",
+            "command": "compare-inventory-state",
+            "validation": "Deviations identified"
+          },
+          {
+            "step": 4,
+            "action": "Process new/unknown VMs",
+            "sub_steps": [
+              {
+                "condition": "New VM found",
+                "actions": [
+                  "Alert user via email/notification",
+                  "Ask: 'New VM [name] found. Is this expected?'",
+                  "If yes: Request credentials and purpose",
+                  "If no: Flag as potential security issue",
+                  "Update context with new VM info"
+                ]
+              }
+            ]
+          },
+          {
+            "step": 5,
+            "action": "Process missing VMs",
+            "sub_steps": [
+              {
+                "condition": "VM in context but not in live inventory",
+                "actions": [
+                  "Alert user: 'VM [name] is missing. Was this intentional?'",
+                  "If intentional: Remove from context",
+                  "If not: Offer recovery options",
+                  "Options: Restore from backup, Recreate from playbook/terraform"
+                ]
+              }
+            ]
+          },
+          {
+            "step": 6,
+            "action": "Update resource utilization",
+            "command": "update-node-resources",
+            "validation": "Resource limits updated"
+          },
+          {
+            "step": 7,
+            "action": "Generate deviation report",
+            "output": "Summary of all changes and actions taken"
+          }
+        ],
+        "deviation_handlers": {
+          "new_vm_found": {
+            "alert_template": "New VM detected: {vm_name} (ID: {vm_id}) on node {node}",
+            "required_info": ["purpose", "owner", "ssh_credentials", "expected_lifetime"],
+            "actions": ["add_to_inventory", "configure_monitoring", "apply_security_baseline"]
+          },
+          "vm_missing": {
+            "alert_template": "VM missing: {vm_name} (ID: {vm_id}) last seen {last_seen}",
+            "recovery_options": [
+              "restore_from_backup",
+              "recreate_from_terraform",
+              "recreate_from_ansible",
+              "mark_as_decommissioned"
+            ]
+          },
+          "resource_changed": {
+            "alert_template": "VM {vm_name} resources changed: {changes}",
+            "actions": ["update_context", "verify_with_owner"]
+          },
+          "unknown_template": {
+            "severity": "warning",
+            "template": "Subject: Unknown Template Found - Validation Required\n\nAn unknown template has been discovered:\n- Template ID: {template_id}\n- Name: {template_name}\n- Node: {node}\n\nThis template needs to be validated for MCP compliance.\n\nOptions:\n1. VALIDATE - Check if template has ansible-admin access\n2. DELETE - Remove template if not needed\n3. KEEP - Mark as legacy/non-compliant\n\nIf validation shows the template lacks ansible-admin:\n- We can fix it by adding the account\n- Or replace it with a compliant template",
+            "required_response": ["action", "credentials_if_fix"]
+          }
+        }
+      },
+      "update_node_resources": {
+        "description": "Update node resource limits and availability",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Query node capabilities",
+            "command": "Get total CPU, RAM, storage for each node"
+          },
+          {
+            "step": 2,
+            "action": "Calculate current usage",
+            "command": "Sum resources used by all VMs on node"
+          },
+          {
+            "step": 3,
+            "action": "Calculate available resources",
+            "formula": "available = total - used - reserved_overhead"
+          },
+          {
+            "step": 4,
+            "action": "Update context with limits",
+            "data": {
+              "node_name": {
+                "total_cores": "integer",
+                "available_cores": "integer",
+                "total_memory_mb": "integer",
+                "available_memory_mb": "integer",
+                "total_storage_gb": "integer",
+                "available_storage_gb": "integer",
+                "max_vms": "integer",
+                "current_vms": "integer"
+              }
+            }
+          },
+          {
+            "step": 5,
+            "action": "Flag nodes with low resources",
+            "thresholds": {
+              "cpu_warning": "80%",
+              "cpu_critical": "90%",
+              "memory_warning": "85%",
+              "memory_critical": "95%",
+              "storage_warning": "80%",
+              "storage_critical": "90%"
+            }
+          }
+        ]
+      }
+    },
+    "template_operations": {
+      "create_template": {
+        "description": "Create a new VM template with MCP standards",
+        "requirements": {
+          "must_have": [
+            "ansible-admin account configured",
+            "MCP SSH keys installed",
+            "cloud-init installed and configured",
+            "sudo without password for ansible-admin"
+          ]
+        },
+        "steps": [
+          {
+            "step": 1,
+            "action": "Create base VM",
+            "validation": "VM created with desired OS"
+          },
+          {
+            "step": 2,
+            "action": "Install required packages",
+            "commands": [
+              "apt update",
+              "apt install -y cloud-init python3 python3-pip sudo openssh-server"
+            ],
+            "validation": "All packages installed"
+          },
+          {
+            "step": 3,
+            "action": "Create ansible-admin account",
+            "commands": [
+              "useradd -m -s /bin/bash ansible-admin",
+              "usermod -aG sudo ansible-admin",
+              "echo 'ansible-admin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ansible-admin",
+              "chmod 440 /etc/sudoers.d/ansible-admin"
+            ],
+            "validation": "ansible-admin can sudo without password"
+          },
+          {
+            "step": 4,
+            "action": "Configure SSH access",
+            "commands": [
+              "mkdir -p /home/ansible-admin/.ssh",
+              "echo '{mcp_public_key}' > /home/ansible-admin/.ssh/authorized_keys",
+              "chown -R ansible-admin:ansible-admin /home/ansible-admin/.ssh",
+              "chmod 700 /home/ansible-admin/.ssh",
+              "chmod 600 /home/ansible-admin/.ssh/authorized_keys"
+            ],
+            "validation": "SSH key authentication works"
+          },
+          {
+            "step": 5,
+            "action": "Configure cloud-init",
+            "config": {
+              "users": ["default", "ansible-admin"],
+              "ssh_pwauth": false,
+              "disable_root": false,
+              "preserve_hostname": false
+            }
+          },
+          {
+            "step": 6,
+            "action": "Clean VM for templating",
+            "commands": [
+              "cloud-init clean",
+              "truncate -s 0 /etc/machine-id",
+              "rm -f /var/lib/dbus/machine-id",
+              "rm -f /home/ansible-admin/.bash_history",
+              "history -c"
+            ]
+          },
+          {
+            "step": 7,
+            "action": "Convert to template",
+            "command": "proxmox_kvm template=yes",
+            "validation": "VM marked as template"
+          },
+          {
+            "step": 8,
+            "action": "Update template inventory",
+            "metadata": {
+              "mcp_compliant": true,
+              "ansible_admin_configured": true,
+              "cloud_init_ready": true,
+              "created_by": "mcp",
+              "created_date": "timestamp"
+            },
+            "validation": "Template cataloged with metadata"
+          }
+        ]
+      },
+      "validate_template": {
+        "description": "Validate existing template meets MCP standards",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Clone template to test VM",
+            "validation": "Test VM created"
+          },
+          {
+            "step": 2,
+            "action": "Test ansible-admin SSH access",
+            "command": "ssh ansible-admin@{test_vm_ip} 'sudo whoami'",
+            "expected": "root",
+            "validation": "SSH access works with sudo"
+          },
+          {
+            "step": 3,
+            "action": "Check cloud-init status",
+            "command": "ssh ansible-admin@{test_vm_ip} 'cloud-init status'",
+            "validation": "Cloud-init is installed and functional"
+          },
+          {
+            "step": 4,
+            "action": "Verify required packages",
+            "packages": ["python3", "sudo", "openssh-server"],
+            "validation": "All required packages present"
+          },
+          {
+            "step": 5,
+            "action": "Cleanup test VM",
+            "command": "Delete test VM",
+            "validation": "Test VM removed"
+          }
+        ],
+        "failure_handling": {
+          "no_ansible_admin": {
+            "prompt": "Template lacks ansible-admin account. Options:\n1. Fix template (add ansible-admin)\n2. Delete template\n3. Keep as non-compliant",
+            "fix_steps": [
+              "Request root/admin credentials from user",
+              "Add ansible-admin account",
+              "Update template",
+              "Mark as MCP compliant"
+            ]
+          },
+          "no_ssh_access": {
+            "prompt": "Cannot SSH to template VMs. Options:\n1. Fix template (add SSH keys)\n2. Delete template\n3. Mark as legacy",
+            "fix_steps": [
+              "Request credentials",
+              "Add MCP SSH keys",
+              "Reconfigure SSH",
+              "Update template"
+            ]
+          }
+        }
+      },
+      "discover_templates": {
+        "description": "Discover and validate all templates in infrastructure",
+        "steps": [
+          {
+            "step": 1,
+            "action": "List all templates from inventory",
+            "validation": "Template list obtained"
+          },
+          {
+            "step": 2,
+            "action": "Check template metadata",
+            "validation": "Identify MCP-compliant vs unknown templates"
+          },
+          {
+            "step": 3,
+            "action": "For each unknown template",
+            "sub_steps": [
+              "Run validate_template procedure",
+              "If validation fails, prompt user for action",
+              "Update template metadata based on results"
+            ]
+          },
+          {
+            "step": 4,
+            "action": "Generate template compliance report",
+            "report": {
+              "compliant_templates": ["list"],
+              "non_compliant_templates": ["list with reasons"],
+              "fixed_templates": ["list of updated templates"],
+              "deleted_templates": ["list of removed templates"]
+            }
+          },
+          {
+            "step": 5,
+            "action": "Update template catalog",
+            "validation": "All templates properly cataloged"
+          }
+        ]
+      }
+    },
+    "alert_operations": {
+      "send_deviation_alert": {
+        "description": "Send alerts for inventory deviations",
+        "alert_channels": ["email", "slack", "mcp_notification"],
+        "alert_types": {
+          "new_vm_detected": {
+            "severity": "warning",
+            "template": "Subject: New VM Detected - Action Required\n\nA new VM has been detected in your infrastructure:\n- VM Name: {vm_name}\n- VM ID: {vm_id}\n- Node: {node}\n- IP: {ip_address}\n- Resources: {cores} cores, {memory}MB RAM\n\nIs this VM expected? Please respond with:\n1. YES - Provide purpose and credentials\n2. NO - Investigate potential security breach\n\nThis VM will be flagged as 'unverified' until confirmed.",
+            "required_response": ["expected", "purpose", "owner", "credentials"]
+          },
+          "vm_missing": {
+            "severity": "critical",
+            "template": "Subject: VM Missing - Recovery Options Available\n\nA VM that was previously tracked is now missing:\n- VM Name: {vm_name}\n- VM ID: {vm_id}\n- Last Seen: {last_seen}\n- Purpose: {purpose}\n\nWas this deletion intentional? Options:\n1. YES - Remove from tracking\n2. NO - Choose recovery method:\n   a) Restore from backup (last backup: {last_backup})\n   b) Recreate from Terraform state\n   c) Recreate from Ansible playbook\n   d) Manual investigation required",
+            "required_response": ["intentional", "recovery_method"]
+          },
+          "resources_exhausted": {
+            "severity": "critical",
+            "template": "Subject: Node Resources Critical\n\nNode {node_name} is running low on resources:\n- CPU Usage: {cpu_percent}% (Critical: >90%)\n- Memory Usage: {memory_percent}% (Critical: >95%)\n- Storage Usage: {storage_percent}%\n- Available for new VMs: {can_create_vms}\n\nRecommended actions:\n1. Migrate VMs to other nodes\n2. Upgrade node resources\n3. Decommission unused VMs",
+            "auto_actions": ["prevent_new_vm_creation", "alert_on_further_degradation"]
+          }
+        }
+      }
+    },
+    "resource_management": {
+      "check_node_capacity": {
+        "description": "Check if node has capacity for new VM",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Get node resource limits from context",
+            "command": "get-mcp-context key='node_resources.{node_name}'"
+          },
+          {
+            "step": 2,
+            "action": "Calculate if VM fits",
+            "checks": [
+              "cores_needed + current_cores <= total_cores * 0.9",
+              "memory_needed + current_memory <= total_memory * 0.95",
+              "storage_needed + current_storage <= total_storage * 0.9"
+            ]
+          },
+          {
+            "step": 3,
+            "action": "Return placement decision",
+            "outputs": {
+              "can_place": "boolean",
+              "reason": "string if cannot place",
+              "resource_after_placement": "object with remaining resources"
+            }
+          }
+        ]
+      },
+      "find_best_node": {
+        "description": "Find optimal node for VM placement",
+        "algorithm": [
+          {
+            "step": 1,
+            "action": "Filter nodes with sufficient resources"
+          },
+          {
+            "step": 2,
+            "action": "Score nodes by criteria",
+            "scoring": {
+              "resource_balance": "Prefer nodes with balanced utilization",
+              "affinity_rules": "Honor any VM placement preferences",
+              "network_locality": "Prefer nodes in same network segment",
+              "failure_domain": "Distribute across failure domains"
+            }
+          },
+          {
+            "step": 3,
+            "action": "Return ranked list of suitable nodes"
+          }
+        ]
+      }
+    }
+  },
+  "infrastructure_state_schema": {
+    "description": "Expected structure for infrastructure state tracking",
+    "vms": {
+      "{vm_id}": {
+        "name": "string",
+        "node": "string",
+        "status": "running|stopped|paused",
+        "purpose": "string",
+        "owner": "string",
+        "created_date": "ISO 8601 date",
+        "last_seen": "ISO 8601 date",
+        "resources": {
+          "cores": "integer",
+          "memory_mb": "integer",
+          "disk_gb": "integer"
+        },
+        "network": {
+          "ip_address": "string",
+          "mac_address": "string",
+          "bridge": "string"
+        },
+        "credentials": {
+          "ssh_user": "string",
+          "ssh_key_name": "string",
+          "notes": "encrypted string"
+        },
+        "backup_policy": "string",
+        "monitoring": "enabled|disabled",
+        "verified": "boolean"
+      }
+    },
+    "nodes": {
+      "{node_name}": {
+        "total_cores": "integer",
+        "total_memory_mb": "integer",
+        "total_storage_gb": "integer",
+        "used_cores": "integer",
+        "used_memory_mb": "integer",
+        "used_storage_gb": "integer",
+        "available_cores": "integer",
+        "available_memory_mb": "integer",
+        "available_storage_gb": "integer",
+        "max_vms": "integer",
+        "current_vms": "integer",
+        "resource_alerts": {
+          "cpu_warning": "boolean",
+          "cpu_critical": "boolean",
+          "memory_warning": "boolean",
+          "memory_critical": "boolean",
+          "storage_warning": "boolean",
+          "storage_critical": "boolean"
+        },
+        "last_updated": "ISO 8601 date"
+      }
+    },
+    "templates": {
+      "{template_id}": {
+        "name": "string",
+        "os": "string",
+        "version": "string",
+        "created_date": "ISO 8601 date",
+        "ssh_enabled": "boolean",
+        "cloud_init": "boolean",
+        "default_user": "string",
+        "packages": ["array of installed packages"]
+      }
+    }
+  },
+  "ansible_admin_account": {
+    "description": "Standard admin account for MCP management",
+    "username": "ansible-admin",
+    "purpose": "Dedicated account for MCP/Ansible automation",
+    "setup": {
+      "create_account": [
+        "useradd -m -s /bin/bash ansible-admin",
+        "usermod -aG sudo ansible-admin",
+        "echo 'ansible-admin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ansible-admin"
+      ],
+      "ssh_setup": [
+        "mkdir -p /home/ansible-admin/.ssh",
+        "cp /root/.ssh/authorized_keys /home/ansible-admin/.ssh/",
+        "chown -R ansible-admin:ansible-admin /home/ansible-admin/.ssh",
+        "chmod 700 /home/ansible-admin/.ssh",
+        "chmod 600 /home/ansible-admin/.ssh/authorized_keys"
+      ],
+      "password_setup": "Use ansible vault to generate and store secure password"
+    },
+    "security": {
+      "password_storage": "Encrypted in MCP context using ansible-vault",
+      "key_rotation": "Rotate SSH keys every 90 days",
+      "audit_logging": "Log all ansible-admin actions"
+    }
+  },
+  "best_practices": {
+    "naming_conventions": {
+      "vms": {
+        "pattern": "{service}-{environment}-{number}",
+        "examples": ["web-prod-01", "db-dev-01", "ollama-gpu-server"]
+      },
+      "templates": {
+        "pattern": "{os}-{version}-template",
+        "examples": ["ubuntu-2204-template", "debian-12-template"]
+      }
+    },
+    "resource_allocation": {
+      "defaults": {
+        "min_cores": 2,
+        "min_memory_mb": 2048,
+        "min_disk_gb": 20
+      },
+      "by_service": {
+        "web_server": {"cores": 2, "memory_mb": 4096},
+        "database": {"cores": 4, "memory_mb": 8192},
+        "ollama": {"cores": 8, "memory_mb": 16384}
+      }
+    },
+    "network_configuration": {
+      "ip_ranges": {
+        "production": "192.168.10.100-199",
+        "development": "192.168.10.200-254",
+        "templates": "192.168.10.90-99"
+      },
+      "dns_servers": ["8.8.8.8", "8.8.4.4"],
+      "default_gateway": "192.168.10.1"
+    }
+  },
+  "error_recovery": {
+    "vm_creation_failed": {
+      "steps": [
+        "Check if VM ID already exists",
+        "Verify template exists and is accessible",
+        "Ensure sufficient resources on host",
+        "Check API token permissions",
+        "Review Proxmox task log for details"
+      ]
+    },
+    "ssh_connection_failed": {
+      "steps": [
+        "Verify VM IP address is correct",
+        "Check if VM is fully booted",
+        "Confirm SSH service is running",
+        "Verify SSH keys are properly configured",
+        "Check network connectivity and firewall rules"
+      ]
+    },
+    "service_installation_failed": {
+      "steps": [
+        "Check VM meets minimum requirements",
+        "Verify internet connectivity from VM",
+        "Review service installation logs",
+        "Check for port conflicts",
+        "Ensure sufficient disk space"
+      ]
+    }
+  },
+  "validation_checks": {
+    "pre_operation": [
+      "Inventory is current (less than 10 hours old)",
+      "Required templates exist",
+      "Sufficient resources available",
+      "Network configuration is valid",
+      "API credentials are working"
+    ],
+    "post_operation": [
+      "Operation completed successfully",
+      "Inventory updated with changes",
+      "Service is accessible",
+      "No errors in logs",
+      "Resources are as expected"
+    ]
+  }
+}

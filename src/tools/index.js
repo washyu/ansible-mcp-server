@@ -10,6 +10,13 @@ import { environmentToolDefinitions, environmentToolHandlers } from './environme
 import { externalServerToolDefinitions, externalServerToolHandlers } from './external-server-tools.js';
 import { hardwareToolDefinitions, hardwareToolHandlers } from './hardware-discovery-tools.js';
 import { enhancedVMToolDefinitions, enhancedVMToolHandlers } from './enhanced-vm-tools.js';
+import { proxmoxInventoryToolDefinitions, proxmoxInventoryToolHandlers } from './proxmox-inventory-tools.js';
+import { sopToolDefinitions, sopToolHandlers } from './sop-tools.js';
+import { inventoryDeviationToolDefinitions, inventoryDeviationToolHandlers } from './inventory-deviation-tools.js';
+import { serviceDetectionToolDefinitions, serviceDetectionToolHandlers } from './service-detection-tools.js';
+import { serviceSOPToolDefinitions, serviceSOPToolHandlers } from './service-sop-loader.js';
+import { credentialToolDefinitions, credentialToolHandlers } from './credential-management-tools.js';
+import { templateValidationToolDefinitions, templateValidationToolHandlers } from './template-validation-tools.js';
 import { securityTools } from '../security-tools.js';
 import { serverManagementTools } from '../server-management-tools.js';
 import { setupTools } from '../setup-tools.js';
@@ -173,6 +180,13 @@ toolRegistry.registerTools(environmentToolDefinitions, environmentToolHandlers);
 toolRegistry.registerTools(externalServerToolDefinitions, externalServerToolHandlers);
 toolRegistry.registerTools(hardwareToolDefinitions, hardwareToolHandlers);
 toolRegistry.registerTools(enhancedVMToolDefinitions, enhancedVMToolHandlers);
+toolRegistry.registerTools(proxmoxInventoryToolDefinitions, proxmoxInventoryToolHandlers);
+toolRegistry.registerTools(sopToolDefinitions, sopToolHandlers);
+toolRegistry.registerTools(inventoryDeviationToolDefinitions, inventoryDeviationToolHandlers);
+toolRegistry.registerTools(serviceDetectionToolDefinitions, serviceDetectionToolHandlers);
+toolRegistry.registerTools(serviceSOPToolDefinitions, serviceSOPToolHandlers);
+toolRegistry.registerTools(credentialToolDefinitions, credentialToolHandlers);
+toolRegistry.registerTools(templateValidationToolDefinitions, templateValidationToolHandlers);
 
 // Register legacy tools (already have JSON Schema format)
 const legacySecurityTools = securityTools.map(tool => ({
